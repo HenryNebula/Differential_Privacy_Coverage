@@ -2,3 +2,7 @@
 simulation/
 
 usable_dataset/
+
+sample\.npy
+
+transfer\.npy

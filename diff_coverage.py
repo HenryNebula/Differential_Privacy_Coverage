@@ -10,6 +10,9 @@ import json
 from read_data import *
 import math
 
+def Gaussian_Approx(X, mu, std):
+    return -norm.cdf(x=(X-0.5-mu)/std) + norm.cdf(x=(X+0.5-mu)/std)
+
 class Diff_Coverage():
 
     def __init__(self, uniform=True, f=0, flip_p=0.001, data_src="SG",
@@ -50,7 +53,7 @@ class Diff_Coverage():
 
         # parallel settings
         self.parallel = parallel
-        self.process_num = 20
+        self.process_num = 1
         self.pool = mp.Pool(processes=self.process_num)
 
         self._is_train = False
@@ -71,22 +74,25 @@ class Diff_Coverage():
 
     def posterior(self, X, plc_id):
         N = self.candidate_num
+        upper_bound = 500
         p_0 = self.p - 0.5 * self.f * (self.p - self.q)
         p_1 = self.q + 0.5 * self.f * (self.p - self.q)
 
         xi = self.xi[plc_id]
         sum_ = 0
         numerator = p_0 ** X * (1 - p_0) ** (N - X)
-        if N > 200:
-            lambda_ = N * p_0
-            numerator *= lambda_ ** X / (0.0 + math.factorial(X)) * np.exp(-lambda_)
+        # use Gaussian to approximate Binomial when N is large
+        if N > upper_bound:
+            mu = N * p_0
+            std = math.sqrt(N * p_0 * (1 - p_0))
+            numerator *= Gaussian_Approx(X,mu,std)
         else:
             numerator *= self.comb_mat[N, X] * (1 - xi) ** N
         for i in range(0, N + 1):
-            # use Gaussian to approximate Binomial
-            if N > 200:
-                lambda_ = N * xi
-                outer = lambda_ ** i / (0.0 + math.factorial(i)) * np.exp(-lambda_)
+            if N > upper_bound:
+                mu = N * xi
+                std = math.sqrt(N * xi * (1 - xi))
+                outer = Gaussian_Approx(i, mu, std)
             else:
                 outer = self.comb_mat[N, i] * xi ** i * (1 - xi) ** (N - i)
             if outer == 0.0:
@@ -96,14 +102,16 @@ class Diff_Coverage():
                 # sum_ += self.comb_mat[N, i] * self.comb_mat[i, m] * p_1 ** m * (1 - p_1) ** (i - m) * \
                 #     self.comb_mat[N - i, X - m] * p_0 ** (X - m) * (1 - p_0) ** (N - i - X + m) * \
                 #     xi ** i * (1 - xi) ** (N - i)
-                if i <= 200:
+                if i <= upper_bound:
                     first_part = self.comb_mat[i, m] * p_1 ** m * (1 - p_1) ** (i - m)
                 else:
-                    lambda_ = i * (1 - p_1)
-                    first_part = lambda_ ** (i-m) / (0.0 + math.factorial(i-m)) * np.exp(-lambda_)
-                if N - i > 200:
-                    lambda_ = (N-i) * p_0
-                    second_part = lambda_ ** (X-m) / (0.0 + math.factorial(X-m)) * np.exp(-lambda_)
+                    mu = i * (1 - p_1)
+                    std = math.sqrt(i * p_1 * (1 - p_1))
+                    first_part = Gaussian_Approx(m, mu, std)
+                if N - i > upper_bound:
+                    mu = (N-i) * p_0
+                    std = math.sqrt((N-i) * p_0 * (1 - p_0))
+                    second_part = Gaussian_Approx(X-m,mu,std)
                 else:
                     second_part = self.comb_mat[N - i, X - m] * p_0 ** (X - m) * (1 - p_0) ** (N - i - X + m)
                 # inner += self.comb_mat[i, m] * p_1 ** m * (1 - p_1) ** (i - m) * \
@@ -273,7 +281,7 @@ class Diff_Coverage():
                     party = sample[choice, :]
                     unused = sample[not_choice, :]
                     sum_row = np.sum(party, axis=0)
-                    # print 'Loss reduce by: ', str(diff), 'r and r_ is: ', r, r_
+                    print 'Loss reduce by: ', str(diff), 'r and r_ is: ', r, r_
                 else:
                     break
             else:
@@ -496,7 +504,7 @@ def simulate_pipeline(real=True):
     iter_per_set = 1
     for i in range(0, dataset_num):
         new_simulation = Diff_Coverage(flip_p=0.1, candidate_num=300,
-                                       plc_num=1000, people=2000, k_favor=5)
+                                       plc_num=2000, people=1000, k_favor=20, max_iter=400)
         # new_simulation.real_sample(draw=True, skew=True, real=False)
         # new_simulation.transfer_sample(draw=False)
         # new_simulation.posterior_regression(draw=True)
@@ -512,4 +520,5 @@ def simulate_pipeline(real=True):
 
 if __name__ == '__main__':
     simulate_pipeline()
-
+    # ns = Diff_Coverage(candidate_num=500)
+    # ns.make_table()
