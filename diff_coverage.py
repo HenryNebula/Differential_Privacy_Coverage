@@ -500,11 +500,13 @@ def stat_compute():
 
 
 def simulate_pipeline(real=True):
-    dataset_num = 1
-    iter_per_set = 1
+    dataset_num = 7
+    k_favor_list = range(5,40,5)
+    iter_per_set = 10
     for i in range(0, dataset_num):
+        k_favor = k_favor_list[i]
         new_simulation = Diff_Coverage(flip_p=0.1, candidate_num=300,
-                                       plc_num=2000, people=1000, k_favor=20, max_iter=400)
+                                       plc_num=2000, people=1000, k_favor=k_favor, max_iter=400)
         # new_simulation.real_sample(draw=True, skew=True, real=False)
         # new_simulation.transfer_sample(draw=False)
         # new_simulation.posterior_regression(draw=True)
@@ -512,13 +514,11 @@ def simulate_pipeline(real=True):
         for j in range(0, iter_per_set):
             choice = new_simulation.train(use_grad=True)
             result = new_simulation.validate(choice, times=2)
-            print result
-            # with open(str(i) + '_' + str(j) + ".json", 'w') as f:
-            #     f.write(json.dumps(result, indent=4))
+            # print result
+            with open(str(i) + '_' + str(j) + ".json", 'w') as f:
+                f.write(json.dumps(result, indent=4))
 
 
 
 if __name__ == '__main__':
     simulate_pipeline()
-    # ns = Diff_Coverage(candidate_num=500)
-    # ns.make_table()
