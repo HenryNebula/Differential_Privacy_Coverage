@@ -6,3 +6,21 @@ usable_dataset/
 sample\.npy
 
 transfer\.npy
+
+add_skew/
+
+change_cand/
+
+change_k/
+
+change_p/
+
+test/
+
+0_0\.txt
+
+*.png
+
+*.pptx
+
+XY\.npz

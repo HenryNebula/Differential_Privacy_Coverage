@@ -124,10 +124,63 @@ class SG():
         return bit_array[0:self.people,:]
 
 
+# coontact graph
+class CG():
+    def __init__(self, k_favor, people, max_id=1000):
+        self.k_favor = k_favor
+        self.people = people
+        # scaling paras for crowdsourcing dataset
+        self.x_granu = 0.01
+        self.y_granu = 0.01
+        self.max_id = max_id
+
+    def read_scratch(self):
+        with open('travel_plan', 'r') as f:
+            l = f.readlines()
+        new_l = []
+        for line in l:
+            line = line.split(';')
+            line = [i.split(',') for i in line]
+            line = [(int(float(i[1])/ self.y_granu),
+                     int(float(i[0])/ self.x_granu)) for i in line]
+            line = set(line)
+            new_l.append(list(line))
+
+        contact_graph = []
+        for id1, person1 in enumerate(new_l):
+            neighbor = []
+            for id2, person2 in enumerate(new_l):
+                if id1 == id2:
+                    continue
+                if set.intersection(set(person1), set(person2)) != set():
+                    neighbor.append(id2)
+            print id1
+            contact_graph.append((id1, neighbor))
+        with open("Contact_graph.json",'w') as f:
+            f.write(json.dumps(contact_graph))
+
+    def make_grid(self):
+        with open("Contact_graph.json","r") as f:
+            l = json.loads(f.read())
+        choose = []
+        for man in l:
+            id = man[0]
+            neighbor = man[1]
+            if len(neighbor) < self.k_favor:
+                continue
+            if neighbor[self.k_favor - 1] >= self.max_id:
+                continue
+            choose.append((id, neighbor[0:self.k_favor]))
+        print "Now recruit people: ", len(choose)
+        if len(choose) < self.people:
+            print  "Ask for too many people, try reduce people or increase max_id"
+            exit(1)
+        bit_array = np.zeros((len(choose), self.max_id))
+        for i,choice in enumerate(choose):
+            bit_array[i, choice[1]] = 1
+        return bit_array[0:self.people,:]
 
 
-
-
-# sg = SG(k_favor=5, people=2000, max_id=1000)
-# # sg.read_scratch()
-# sg.make_grid()
+# cg = CG(k_favor=20, people=1000)
+# # cg.read_scratch()
+# cg.make_grid()

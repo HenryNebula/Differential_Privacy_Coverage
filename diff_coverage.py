@@ -1,6 +1,7 @@
 from __future__ import division
 from scipy.special import comb
 from scipy.stats import norm
+import os
 import numpy as np
 import random
 from matplotlib import pyplot as plt
@@ -15,13 +16,13 @@ def Gaussian_Approx(X, mu, std):
 
 class Diff_Coverage():
 
-    def __init__(self, uniform=True, f=0, flip_p=0.001, data_src="SG",
+    def __init__(self, uniform=True, f=0, flip_p=0.001, flip_q = 0.1, data_src="SG",
                  plc_num=200,people=500, candidate_num=50, k_favor=5,
-                 max_iter=200, stop_iter=200, parallel=False):
+                 max_iter=200, stop_iter=200, freeze=False, skew=False):
         # constants in rappor
         self.f = f
         self.p = flip_p
-        self.q = 1 - self.p
+        self.q = flip_q
 
         # constants in datasets
         self.plc_num = plc_num
@@ -51,12 +52,13 @@ class Diff_Coverage():
         self.a = None
         self.b = None
 
-        # parallel settings
-        self.parallel = parallel
-        self.process_num = 1
-        self.pool = mp.Pool(processes=self.process_num)
-
         self._is_train = False
+        self.transferred_sample = None
+        self.true_sample = None
+
+        self.freeze = freeze
+        self.prob_mat = None
+        self.skew = skew
 
     # make table for combination numbers
     def make_table(self):
@@ -153,29 +155,40 @@ class Diff_Coverage():
         return plcs
 
     # read real dataset from different resources
-    def real_sample(self, draw=False, skew=False):
-        if self.data_source == "MCS":
-            rd = MCS(k_favor=self.k_favor, people=self.people)
-            sample = rd.make_grid()
-            np.save(self.sample_dir, sample)
-            self.plc_num = rd.plc_num
-            print "Total recruit: ", self.people, " from places: ", self.plc_num, sample.shape[1]
-            self.update_paras()
-            if not self.uniform:
-                self.xi = np.sum(sample, axis=0) / (0.0 + self.people)
-        elif self.data_source == "SG":
-            rd = SG(k_favor=self.k_favor, people=self.people, max_id=self.plc_num)
-            sample = rd.make_grid()
+    def real_sample(self, draw=False):
+        if self.data_source == "MCS" or "SG" or "CG":
+            if self.data_source == "MCS":
+                rd = MCS(k_favor=self.k_favor, people=self.people)
+                sample = rd.make_grid()
+                self.plc_num = rd.plc_num
+                # if not self.uniform:
+                #     self.xi = np.sum(sample, axis=0) / (0.0 + self.people)
+            elif self.data_source == "SG":
+                rd = SG(k_favor=self.k_favor, people=self.people, max_id=self.plc_num)
+                sample = rd.make_grid()
+                # if not self.uniform:
+                #     self.xi = np.sum(sample, axis=0) / (0.0 + self.people)
+            else:
+                rd = CG(k_favor=self.k_favor, people=self.people, max_id=self.plc_num)
+                sample = rd.make_grid()
+            if self.skew:
+                print "Not real dataset, add artificial groups"
+                num = int(self.plc_num/self.k_favor)
+                full_group = np.zeros((num, self.plc_num))
+                for row in range(0,num):
+                    full_group[row, range((row-1)*self.k_favor, row*self.k_favor)] = 1
+                sample = np.vstack((sample, full_group))
+                self.people = sample.shape[0]
             np.save(self.sample_dir, sample)
             print "Total recruit: ", self.people, " from places: ", self.plc_num
             self.update_paras()
-            if not self.uniform:
-                self.xi = np.sum(sample, axis=0) / (0.0 + self.people)
+            # if not self.uniform:
+            #     self.xi = np.sum(sample, axis=0) / (0.0 + self.people)
         else:
             sample = np.zeros((self.people, self.plc_num))
 
             # skew: add groups of people covering the whole area
-            if skew:
+            if self.skew:
                 partition = [0.2, 0.3, 0.5]
                 self.k_favor = self.plc_num / self.candidate_num
                 all_plc = list(np.random.permutation(self.plc_num))
@@ -193,7 +206,7 @@ class Diff_Coverage():
                 for i in range(0, self.people):
                     index = self.prob_dist()
                     sample[i, index] = np.ones(self.k_favor)
-        self.update_paras()
+            self.update_paras()
         row_sum = np.sum(sample, axis=0)
         if draw:
             plt.plot(np.arange(0, self.plc_num), row_sum)
@@ -222,9 +235,12 @@ class Diff_Coverage():
         return B
 
     # create "fake" dataset after random response
-    def transfer_sample(self, draw):
+    def transfer_sample(self, draw=False):
         sample = self.real_sample()
-
+        self.true_sample = sample.copy()
+        if not self.uniform:
+            self.xi = np.sum(self.true_sample, axis=0) / self.people
+            self.xi[self.xi == 0] = 1.0 / self.people
         for i in range(0, self.people):
             r = sample[i, :]
             r = np.array(map(lambda bit: self.flip(bit), r))[np.newaxis, :]
@@ -234,23 +250,31 @@ class Diff_Coverage():
         if draw:
             plt.plot(np.arange(0, self.plc_num), row_sum)
             plt.show()
-        return sample
+        self.transferred_sample = sample
+        np.save(self.transfer_dir, sample)
 
     # sum posterior in terms of locations
     def sum_posterior(self, sum_row):
-        if self.parallel:
-            results = [self.pool.apply(self.posterior, args=(int(x),))
-                       for x in sum_row.tolist()]
-            total_sum = np.sum(np.array(results))
+        if self.uniform and self.prob_mat is not None:
+            posterior_per_loc = [self.prob_mat[int(x)] for x in sum_row]
         else:
             posterior_per_loc = [self.posterior(int(x), id) for id, x in enumerate(sum_row)]
-            total_sum = np.sum(np.array(posterior_per_loc))
+        total_sum = np.sum(np.array(posterior_per_loc))
         return total_sum
 
-    def train(self, parallel=False, use_grad=False):
-
-        sample = self.transfer_sample(draw=False)
-        self.parallel = parallel
+    def train(self, use_grad=False):
+        if not os.path.exists(self.sample_dir) or \
+                not os.path.exists(self.transfer_dir) or not self.freeze:
+            self.transfer_sample()
+            sample = self.transferred_sample
+        else:
+            self.transferred_sample = np.load(self.transfer_dir)
+            self.true_sample = np.load(self.sample_dir)
+            sample = self.transferred_sample
+            self.update_paras()
+            if not self.uniform:
+                self.xi = np.sum(self.true_sample, axis=0) / self.people
+                self.xi[np.where(self.xi)==0] = 1 / self.people
 
         # first fit the linear regression coefficients
         self.posterior_regression(draw=False)
@@ -268,6 +292,7 @@ class Diff_Coverage():
         print "Start Training: Original Loss - " + str(total_sum)
 
         same_count = 0
+        past_set = set()
         for i in range(0, self.iter):
 
             if use_grad:
@@ -276,12 +301,21 @@ class Diff_Coverage():
                 r = choice[id_of_r]
                 r_ = not_choice[id_of_r_]
                 if diff > 0:
+                    if {r,r_} == past_set:
+                        same_count += 1
+                    else:
+                        past_set = {r, r_}
+                        same_count = 0
+                    if same_count >= 3:
+                        print "Stop iteration at: ", i
+                        break
                     choice[id_of_r] = r_
                     not_choice[id_of_r_] = r
                     party = sample[choice, :]
                     unused = sample[not_choice, :]
                     sum_row = np.sum(party, axis=0)
-                    print 'Loss reduce by: ', str(diff), 'r and r_ is: ', r, r_
+
+                    # print 'Loss reduce by: ', str(diff), 'r and r_ is: ', r, r_
                 else:
                     break
             else:
@@ -305,25 +339,25 @@ class Diff_Coverage():
                 else:
                     same_count += 1
 
-                print str(total_sum), same_count
+                # print str(total_sum), same_count
 
                 if same_count > 1 and use_grad:
                     break
                 elif same_count > self.stop_iter:
                     break
         total_sum = self.sum_posterior(sum_row)
-        print 'Finish:', total_sum
-        np.save(self.transfer_dir, sample)
+        print 'Finish:', total_sum, same_count
         self._is_train = True
         return choice
 
+    # compare with two baseline: use "fake data" directly and greedy random search
     def validate(self, choice, times=10):
         if not self._is_train:
             exit(1)
-        fail = 0
-        abnormal = 0
-        true_sample = np.load(self.sample_dir)
-        fake_sample = np.load(self.transfer_dir)
+        # fail = 0
+        # abnormal = 0
+        true_sample = self.true_sample
+        fake_sample = self.transferred_sample
 
         result = []
         true_opt_party = true_sample[choice, :]
@@ -333,6 +367,8 @@ class Diff_Coverage():
         coverage_opt = np.sum(np.sum(true_opt_party, axis=0) > 0)
         result.append((coverage_opt, total_sum_opt))
         for i in range(times):
+            # totally random pick:
+            print "Random Pick"
             rand_choice = random.sample(range(self.people), self.candidate_num)
             true_rand_party = true_sample[rand_choice, :]
             fake_rand_party = fake_sample[rand_choice, :]
@@ -343,6 +379,39 @@ class Diff_Coverage():
             coverage_rand = np.sum(np.sum(true_rand_party, axis=0) > 0)
             result.append((coverage_rand, total_sum_rand))
 
+            # greedy search
+            # print "Rand_Greedy"
+            # rand_greedy_choice = self.train(use_grad=False)
+            # rand_greedy_party = true_sample[rand_greedy_choice,:]
+            # rand_greedy_fake_party = fake_sample[rand_greedy_choice,:]
+            #
+            # sum_row = np.sum(rand_greedy_fake_party, axis=0)
+            # total_sum_rand_greedy = self.sum_posterior(sum_row)
+            # coverage_rand_greedy = np.sum(np.sum(rand_greedy_party, axis=0) > 0)
+            # result.append((coverage_rand_greedy, total_sum_rand_greedy))
+
+            # take fake as real
+
+            print "Fake as Real"
+
+            raw_p, raw_q = (self.p, self.q)
+            self.p,self.q = (1e-10, 1-1e-10)
+            if not self.uniform:
+                raw_xi = self.xi
+                self.xi = np.sum(fake_sample, axis=0) / self.people
+            fake_choice = self.train(use_grad=True)
+            print fake_choice
+            fake_party = true_sample[fake_choice,:]
+            fake_fake_party = fake_sample[fake_choice,:]
+
+            sum_row = np.sum(fake_fake_party, axis=0)
+            total_sum_fake = self.sum_posterior(sum_row)
+            coverage_fake = np.sum(np.sum(fake_party, axis=0) > 0)
+            result.append((coverage_fake, total_sum_fake))
+            self.p, self.q = (raw_p, raw_q)
+            if not self.uniform:
+                self.xi = raw_xi
+
             # print "posterior probability: ", total_sum_rand
             # print "random select: ", coverage_rand
 
@@ -350,14 +419,15 @@ class Diff_Coverage():
             # print "true select: ", coverage_opt
             # print "*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*"
 
-            if coverage_rand > coverage_opt:
-                fail += 1
-                if total_sum_rand > total_sum_opt:
-                    abnormal += 1
+            # if coverage_rand > coverage_opt:
+            #     fail += 1
+            #     if total_sum_rand > total_sum_opt:
+            #         abnormal += 1
 
-        print "abnormal rate: " + str(abnormal) + '/' + str(times)
-        print "fail rate: " + str(fail) + '/' + str(times)
-        # first element is opt, others are rand
+        # print "abnormal rate: " + str(abnormal) + '/' + str(times)
+        # print "fail rate: " + str(fail) + '/' + str(times)
+
+        # first element is opt, second is random-greedy, third is fake-data
         return result
 
     # plot random select results to find relationship between loss function and target
@@ -404,32 +474,54 @@ class Diff_Coverage():
 
         # x_max = self.candidate_num + 1
         x_max = 10
-        for plc_id in range(self.plc_num):
+        def find_coeffs(plc_id):
             X_range = np.arange(0, x_max)
-            ans = np.zeros(X_range.shape)
             stop_count = self.candidate_num + 1
+            ans = np.zeros(X_range.shape)
             for X in X_range:
-                ans[X] = np.log(self.posterior(X=X,plc_id=plc_id))
+                ans[X] = np.log(self.posterior(X=X, plc_id=plc_id))
                 if ans[X] == -np.inf or ans[X] == np.nan:
                     ans[X] = 0
                     stop_count = X
                     break
             X_range = X_range[0:stop_count, np.newaxis]
             ans = ans[0:stop_count, np.newaxis]
-            if(draw):
+            if (draw):
                 plt.scatter(X_range, ans)
                 plt.show()
             lr = LinearRegression()
             lr.fit(X_range, ans)
-            if self.uniform:
-                # one fit is enough
-                self.a = np.ones(self.a.shape) * lr.coef_
-                self.b = np.ones(self.b.shape) * lr.intercept_
-                break
-            else:
-                self.a[plc_id] = lr.coef_
-                self.b[plc_id] = lr.intercept_
-            # print "Regression Score: ", lr.score(X_range, ans)
+            return lr.coef_, lr.intercept_
+
+        if self.uniform:
+            # print "Make posterior tables!"
+            self.prob_mat = np.array([self.posterior(x,1) for x in range(self.candidate_num + 1)])
+            self.prob_mat[np.isnan(self.prob_mat)] = 0
+            coeffs = find_coeffs(plc_id=0)
+            self.a = np.ones(self.a.shape) * coeffs[0]
+            self.b = np.ones(self.b.shape) * coeffs[1]
+        else:
+            self.prob_mat = np.zeros((self.plc_num, self.candidate_num + 1))
+            # plc with same prior just need one time calculation
+            prior_dict = {}
+
+            for plc_id in range(self.plc_num):
+                xi_id = int(np.around(self.xi[plc_id] * self.people))
+                if prior_dict.has_key(xi_id):
+                    # self.prob_mat[plc_id,:] = self.prob_mat[prior_dict[xi_id],:]
+                    self.a[plc_id] = self.a[prior_dict[xi_id]]
+                    self.b[plc_id] = self.b[prior_dict[xi_id]]
+                else:
+                    # for x in range(0,self.candidate_num+1):
+                    #     self.prob_mat[plc_id, x] = self.posterior(X=x, plc_id=plc_id)
+                    prior_dict[xi_id] = plc_id
+                    coeffs = find_coeffs(plc_id)
+                    self.a[plc_id] = coeffs[0]
+                    self.b[plc_id] = coeffs[1]
+                # if xi_id == 0:
+                #     print self.a[plc_id], self.b[plc_id]
+
+            print "Total different prior: ", len(prior_dict)
         print "Linear Regression over"
 
     def grad_boosting(self, sum_row, party, unused):
@@ -499,24 +591,72 @@ def stat_compute():
     plt.show()
 
 
-def simulate_pipeline(real=True):
-    dataset_num = 7
-    k_favor_list = range(5,40,5)
+def simulate_pipeline(change_k=False, change_p=False, change_cand=False, add_skew=False):
+    if change_k:
+        changed_paras = range(10,40,10)
+        dir_name = 'change_k'
+    elif change_p:
+        changed_paras = [0.1, 0.01, 0.001]
+        dir_name = 'change_p'
+    elif change_cand:
+        changed_paras = range(40,45,2)
+        dir_name = 'change_cand'
+    elif add_skew:
+        changed_paras = [True, False]
+        dir_name = 'add_skew'
+    else:
+        dir_name = 'test'
+        changed_paras = [0]
+
+    try:
+        os.listdir(dir_name)
+    except OSError:
+        os.mkdir(dir_name)
+
+    dataset_num = len(changed_paras)
     iter_per_set = 10
+
     for i in range(0, dataset_num):
-        k_favor = k_favor_list[i]
-        new_simulation = Diff_Coverage(flip_p=0.1, candidate_num=300,
-                                       plc_num=2000, people=1000, k_favor=k_favor, max_iter=400)
+        print "Start a new set!"
+        plc_num = 1000
+        people = 600
+        candidate = 100
+        p = 0.1
+        q = 0.9
+        k_favor = 30
+        skew = False
+
+        if change_k:
+            k_favor = changed_paras[i]
+        elif change_cand:
+            candidate = changed_paras[i]
+        elif change_p:
+            p = changed_paras[i]
+        elif add_skew:
+            skew = changed_paras[i]
+
+        new_simulation = Diff_Coverage(flip_p=p, flip_q=q, candidate_num=candidate,
+                                       plc_num=plc_num, people=people, k_favor=k_favor, max_iter=4000,
+                                       data_src="SG", uniform=False,freeze=True,skew=skew)
+        try:
+            os.remove(new_simulation.sample_dir)
+        except:
+            print "No real sample detected!"
+        try:
+            os.remove(new_simulation.transfer_dir)
+        except:
+            print "No transferred data detected!"
         # new_simulation.real_sample(draw=True, skew=True, real=False)
         # new_simulation.transfer_sample(draw=False)
         # new_simulation.posterior_regression(draw=True)
 
         for j in range(0, iter_per_set):
             choice = new_simulation.train(use_grad=True)
-            result = new_simulation.validate(choice, times=2)
-            # print result
-            with open(str(i) + '_' + str(j) + ".json", 'w') as f:
-                f.write(json.dumps(result, indent=4))
+            result = new_simulation.validate(choice, times=1)
+            print result
+            with open(dir_name+ '/' + new_simulation.data_source + '_' +
+                      str(i) + '_' + str(j) + ".json", 'w') as f:
+                f.write(json.dumps(result))
 
 
 
