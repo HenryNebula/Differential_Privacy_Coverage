@@ -49,19 +49,20 @@ def plot_posterior():
 
     obj = Diff_Coverage(flip_p=p, flip_q=q, candidate_num=candidate,
                                    plc_num=plc_num, people=people, k_favor=k_favor, max_iter=4000,
-                                   data_src="SG", uniform=False, freeze=False, skew=skew)
+                                   data_src="SG", uniform=False, freeze=False, skew=skew, random_start=1)
     obj.train(use_grad=True)
-    X_u=[30,60,90]
+    X_u=range(0,9)
     def f(p,q,x):
         obj.p, obj.q = p, q
         xi = obj.xi
-        print xi[54]
-        prob_ = obj.posterior(x, 54)
+        print xi[0]
+        prob_ = obj.posterior(x, 0)
         return prob_
     X, Y = np.meshgrid(p_range, q_range)
     num = 8
+    plt.figure(figsize=(10.24,7.80))
     for i, x in enumerate(X_u):
-        ax = plt.subplot(len(X_u),1,i+1)
+        ax = plt.subplot(3,3,i+1)
         plt.contourf(X, Y, f(X, Y,x), num, alpha=1)
         C = plt.contour(X, Y, f(X, Y,x), num, colors='black', linewidth=0.5)
         plt.clabel(C, inline=True, fontsize=10)
@@ -79,5 +80,5 @@ def plot_posterior():
 
 
 if __name__ == '__main__':
-    plot_epsilon()
-    # plot_posterior()
+    # plot_epsilon()
+    plot_posterior()

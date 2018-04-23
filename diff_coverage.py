@@ -18,7 +18,7 @@ class Diff_Coverage():
 
     def __init__(self, uniform=True, f=0, flip_p=0.001, flip_q = 0.1, data_src="SG",
                  plc_num=200,people=500, candidate_num=50, k_favor=5,
-                 max_iter=200, stop_iter=200, freeze=False, skew=False):
+                 max_iter=200, stop_iter=200, freeze=False, skew=False, random_start=5):
         # constants in rappor
         self.f = f
         self.p = flip_p
@@ -59,6 +59,7 @@ class Diff_Coverage():
         self.freeze = freeze
         self.prob_mat = None
         self.skew = skew
+        self.random_start = random_start
 
     # make table for combination numbers
     def make_table(self):
@@ -262,7 +263,7 @@ class Diff_Coverage():
         total_sum = np.sum(np.array(posterior_per_loc))
         return total_sum
 
-    def train(self, use_grad=False):
+    def train(self, use_grad=False, fake=False):
         if not os.path.exists(self.sample_dir) or \
                 not os.path.exists(self.transfer_dir) or not self.freeze:
             self.transfer_sample()
@@ -271,84 +272,90 @@ class Diff_Coverage():
             self.transferred_sample = np.load(self.transfer_dir)
             self.true_sample = np.load(self.sample_dir)
             sample = self.transferred_sample
-            self.update_paras()
-            if not self.uniform:
+            if not self.uniform and not fake:
+                self.update_paras()
                 self.xi = np.sum(self.true_sample, axis=0) / self.people
-                self.xi[np.where(self.xi)==0] = 1 / self.people
+                # self.xi[np.where(self.xi)==0] = 1 / self.people
 
         # first fit the linear regression coefficients
         self.posterior_regression(draw=False)
 
-        # choice means those ids which are in the candidate set
-        choice = random.sample(range(self.people), self.candidate_num)
-        not_choice = list(set(range(self.people)).difference(set(choice)))
+        min_loss = 1e10
+        final_choice = []
+        for i in range(0, self.random_start):
+            # choice means those ids which are in the candidate set
+            choice = random.sample(range(self.people), self.candidate_num)
+            not_choice = list(set(range(self.people)).difference(set(choice)))
 
-        # party means the bit arrays for those candidates
-        party = sample[choice, :]
-        unused = sample[not_choice, :]
+            # party means the bit arrays for those candidates
+            party = sample[choice, :]
+            unused = sample[not_choice, :]
 
-        sum_row = np.sum(party, axis=0)
-        total_sum = self.sum_posterior(sum_row)
-        print "Start Training: Original Loss - " + str(total_sum)
+            sum_row = np.sum(party, axis=0)
+            total_sum = self.sum_posterior(sum_row)
+            print "Start Training: Original Loss - " + str(total_sum)
 
-        same_count = 0
-        past_set = set()
-        for i in range(0, self.iter):
+            same_count = 0
+            past_set = set()
+            for i in range(0, self.iter):
 
-            if use_grad:
-                diff, id_of_r, id_of_r_ = self.grad_boosting(
-                    sum_row, party, unused)
-                r = choice[id_of_r]
-                r_ = not_choice[id_of_r_]
-                if diff > 0:
-                    if {r,r_} == past_set:
-                        same_count += 1
+                if use_grad:
+                    diff, id_of_r, id_of_r_ = self.grad_boosting(
+                        sum_row, party, unused)
+                    r = choice[id_of_r]
+                    r_ = not_choice[id_of_r_]
+                    if diff > 0:
+                        if {r,r_} == past_set:
+                            same_count += 1
+                        else:
+                            past_set = {r, r_}
+                            same_count = 0
+                        if same_count >= 3:
+                            print "Stop iteration at: ", i
+                            break
+                        choice[id_of_r] = r_
+                        not_choice[id_of_r_] = r
+                        party = sample[choice, :]
+                        unused = sample[not_choice, :]
+                        sum_row = np.sum(party, axis=0)
+
+                        # print 'Loss reduce by: ', str(diff), 'r and r_ is: ', r, r_
                     else:
-                        past_set = {r, r_}
-                        same_count = 0
-                    if same_count >= 3:
-                        print "Stop iteration at: ", i
                         break
-                    choice[id_of_r] = r_
-                    not_choice[id_of_r_] = r
-                    party = sample[choice, :]
-                    unused = sample[not_choice, :]
-                    sum_row = np.sum(party, axis=0)
-
-                    # print 'Loss reduce by: ', str(diff), 'r and r_ is: ', r, r_
                 else:
-                    break
-            else:
-                id_of_r = np.random.randint(self.candidate_num)
-                r = choice[id_of_r]
-                id_of_r_ = random.sample(range(len(unused)), 1)[0]
-                r_ = not_choice[id_of_r_]
+                    id_of_r = np.random.randint(self.candidate_num)
+                    r = choice[id_of_r]
+                    id_of_r_ = random.sample(range(len(unused)), 1)[0]
+                    r_ = not_choice[id_of_r_]
 
-                sum_row_new = sum_row - party[id_of_r, :] + sample[r_, :]
-                total_sum_new = self.sum_posterior(sum_row_new)
+                    sum_row_new = sum_row - party[id_of_r, :] + sample[r_, :]
+                    total_sum_new = self.sum_posterior(sum_row_new)
 
-                if total_sum_new < total_sum:
-                    total_sum = total_sum_new
-                    choice[id_of_r] = r_
-                    not_choice[id_of_r_] = r
-                    party = sample[choice, :]
-                    unused = sample[not_choice, :]
+                    if total_sum_new < total_sum:
+                        total_sum = total_sum_new
+                        choice[id_of_r] = r_
+                        not_choice[id_of_r_] = r
+                        party = sample[choice, :]
+                        unused = sample[not_choice, :]
 
-                    sum_row = np.sum(party, axis=0)
-                    same_count = 0
-                else:
-                    same_count += 1
+                        sum_row = np.sum(party, axis=0)
+                        same_count = 0
+                    else:
+                        same_count += 1
 
-                # print str(total_sum), same_count
+                    # print str(total_sum), same_count
 
-                if same_count > 1 and use_grad:
-                    break
-                elif same_count > self.stop_iter:
-                    break
-        total_sum = self.sum_posterior(sum_row)
-        print 'Finish:', total_sum, same_count
+                    if same_count > 1 and use_grad:
+                        break
+                    elif same_count > self.stop_iter:
+                        break
+            total_sum = self.sum_posterior(sum_row)
+            print 'Finish:', total_sum, same_count, "Random start: ", i
+            if total_sum < min_loss:
+                min_loss = total_sum
+                final_choice = choice
         self._is_train = True
-        return choice
+        return final_choice
 
     # compare with two baseline: use "fake data" directly and greedy random search
     def validate(self, choice, times=10):
@@ -392,15 +399,14 @@ class Diff_Coverage():
 
             # take fake as real
 
-            print "Fake as Real"
-
+            print "Noisy"
             raw_p, raw_q = (self.p, self.q)
             self.p,self.q = (1e-10, 1-1e-10)
             if not self.uniform:
                 raw_xi = self.xi
                 self.xi = np.sum(fake_sample, axis=0) / self.people
-            fake_choice = self.train(use_grad=True)
-            print fake_choice
+            fake_choice = self.train(use_grad=True,fake=True)
+            # print fake_choice
             fake_party = true_sample[fake_choice,:]
             fake_fake_party = fake_sample[fake_choice,:]
 
@@ -411,21 +417,6 @@ class Diff_Coverage():
             self.p, self.q = (raw_p, raw_q)
             if not self.uniform:
                 self.xi = raw_xi
-
-            # print "posterior probability: ", total_sum_rand
-            # print "random select: ", coverage_rand
-
-            # print "posterior probability: ", total_sum_opt
-            # print "true select: ", coverage_opt
-            # print "*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*"
-
-            # if coverage_rand > coverage_opt:
-            #     fail += 1
-            #     if total_sum_rand > total_sum_opt:
-            #         abnormal += 1
-
-        # print "abnormal rate: " + str(abnormal) + '/' + str(times)
-        # print "fail rate: " + str(fail) + '/' + str(times)
 
         # first element is opt, second is random-greedy, third is fake-data
         return result
@@ -501,7 +492,7 @@ class Diff_Coverage():
             self.a = np.ones(self.a.shape) * coeffs[0]
             self.b = np.ones(self.b.shape) * coeffs[1]
         else:
-            self.prob_mat = np.zeros((self.plc_num, self.candidate_num + 1))
+            # self.prob_mat = np.zeros((self.plc_num, self.candidate_num + 1))
             # plc with same prior just need one time calculation
             prior_dict = {}
 
@@ -520,8 +511,8 @@ class Diff_Coverage():
                     self.b[plc_id] = coeffs[1]
                 # if xi_id == 0:
                 #     print self.a[plc_id], self.b[plc_id]
-
             print "Total different prior: ", len(prior_dict)
+
         print "Linear Regression over"
 
     def grad_boosting(self, sum_row, party, unused):
@@ -541,55 +532,6 @@ class Diff_Coverage():
 
         diff = np.max(candidate_add) - np.min(candidate_sub)
         return diff, int(id_of_r), int(id_of_r_)
-
-
-# tool for examining simulation results
-def stat_compute():
-    dataset_num = 20
-    iter_per_set = 20
-    real = 'real_result/'
-    simu = 'simulation/'
-    dir_ = simu
-    true_means = np.zeros((dataset_num,))
-    true_stds = np.zeros((dataset_num,))
-    rand_means = np.zeros((dataset_num,))
-    rand_stds = np.zeros((dataset_num,))
-    file_list = ['p_0.1/','p_0.01/','p_0.001/']
-    whole_mean = np.zeros((len(file_list),2))
-    whole_std = np.zeros((len(file_list),2))
-    for count, fn in enumerate(file_list):
-        whole_true = []
-        whole_rand = []
-        for i in range(0, dataset_num):
-            true = []
-            rand = []
-            for j in range(0, iter_per_set):
-                with open(dir_ + fn + str(i) + '_' + str(j) + ".json",'r') as f:
-                    results = json.loads(f.read())
-                    true.append(results[0][0])
-                    whole_true.append((results[0]))
-                    rand += [i[0] for i in results[1:]]
-                    whole_rand += [i[0] for i in results[1:]]
-            true_means[i] = np.mean(np.array(true))
-            true_stds[i] = np.std(np.array(true))
-            rand_means[i] = np.mean(np.array(rand))
-            rand_stds[i] = np.std(np.array(rand))
-
-        whole_mean[count, 0] = np.mean(np.array(whole_true))
-        whole_std[count, 0] = np.std(np.array(whole_true))
-        whole_mean[count, 1] = np.mean(np.array(whole_rand))
-        whole_std[count, 1] = np.std(np.array(whole_rand))
-
-    ind = np.arange(len(file_list))
-    width = 0.3
-    p1 = plt.bar(ind - width / 2.0, whole_mean[:,0], width=width, color='c', yerr=whole_std[:,0])
-    p2 = plt.bar(ind + width / 2.0, whole_mean[:,1], width=width, color='r', yerr=whole_std[:,1])
-    marker = [i.rstrip('/') for i in file_list]
-    plt.xticks(ind, marker)
-    plt.legend((p1[0], p2[0]),("Greedy (With Gradient Boosting)", "Random"))
-    plt.ylabel("Num of Covered Areas")
-    plt.show()
-
 
 def simulate_pipeline(change_k=False, change_p=False, change_cand=False, add_skew=False):
     if change_k:
@@ -620,11 +562,11 @@ def simulate_pipeline(change_k=False, change_p=False, change_cand=False, add_ske
         print "Start a new set!"
         plc_num = 1000
         people = 600
-        candidate = 100
-        p = 0.1
-        q = 0.9
-        k_favor = 30
-        skew = False
+        candidate = 50
+        p = 0.02
+        q = 0.6
+        k_favor = 25
+        skew = True
 
         if change_k:
             k_favor = changed_paras[i]
