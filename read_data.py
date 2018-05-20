@@ -1,6 +1,40 @@
 import numpy as np
 import random
 import json
+import copy
+
+def init_pick(bit_array,candidate,random_start=5):
+    best_choice = []
+    max_cover = 0
+    max_iter = 2000
+    stop_iter = 500
+    people = bit_array.shape[0]
+    for _ in range(0, random_start):
+        count = 0
+        choice = random.sample(range(people), candidate)
+        coverage = np.sum(np.sum(bit_array[choice, :], axis=0)>0)
+        not_choice = list(set(range(people)).difference(set(choice)))
+        for iter in range(0, max_iter):
+            r = random.sample(choice, 1)[0]
+            r_ = random.sample(not_choice,1)[0]
+            try_choice = copy.copy(choice)
+            try_choice.remove(r)
+            try_choice.append(r_)
+            new_cover = np.sum(np.sum(bit_array[try_choice, :], axis=0)>0)
+            if new_cover > coverage:
+                coverage = new_cover
+                choice = try_choice
+            else:
+                count += 1
+                if count > stop_iter:
+                    print "Stop before max_iter: ", count
+                    break
+        if coverage > max_cover:
+            best_choice = copy.copy(choice)
+            max_cover = coverage
+    print "max_coverage: ", max_cover
+    return bit_array[best_choice, :]
+
 
 # mobile crowdsourcing
 class MCS():
@@ -8,8 +42,8 @@ class MCS():
         self.k_favor = k_favor
         self.people = people
         # scaling paras for crowdsourcing dataset
-        self.x_granu = 0.01
-        self.y_granu = 0.01
+        self.x_granu = 0.1
+        self.y_granu = 0.1
         self.xrange = xrange
         self.yrange = yrange
 
@@ -23,9 +57,11 @@ class MCS():
                 line = [i.split(',') for i in line]
                 line = [(int(float(i[1])/ self.y_granu),
                          int(float(i[0])/ self.x_granu)) for i in line]
-                line = list(set(line))
-                if len(line) >= self.k_favor:
-                    new_l.append(line[0:self.k_favor])
+                new_line = list(set(line))
+                new_line.sort(key=line.index)
+                if len(new_line) >= self.k_favor:
+                    # new_l.append(new_line[0:self.k_favor])
+                    new_l.append(new_line[-self.k_favor:])
         X_coordinate = np.zeros((len(new_l), self.k_favor))
         Y_coordinate = np.zeros((len(new_l), self.k_favor))
         for id in range(0, len(new_l)):
@@ -70,6 +106,7 @@ class MCS():
             ones = [int(i) for i in list(flat_map[row,:])]
             bit_array[row, ones] = 1
         return bit_array[range(self.people),:]
+        # return init_pick(bit_array, self.people)
 
 # social graph
 class SG():
@@ -121,7 +158,9 @@ class SG():
         bit_array = np.zeros((len(choose), self.max_id))
         for i in range(len(choose)):
             bit_array[i,choose[i][1]] = 1
-        return bit_array[0:self.people,:]
+        # return bit_array[random.sample(range(bit_array.shape[0]), self.people), :]
+        # return bit_array[0:self.people,:]
+        return init_pick(bit_array, self.people)
 
 
 # coontact graph

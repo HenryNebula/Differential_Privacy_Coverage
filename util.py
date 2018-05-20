@@ -8,14 +8,6 @@ def plot_epsilon():
     p_range = np.arange(0.001,0.5,0.01)
     # q: 1->1
     q_range = np.arange(0.501,1,0.01)
-    # epsilon = np.zeros((p_range.shape[0], q_range.shape[0]))
-    # for row, p in enumerate(p_range):
-    #     for col, q in enumerate(q_range):
-    #         epsilon[row, col] = np.log(q*(1-p)/p/(1-q))
-    # plt.imshow(epsilon,extent=[0,0.5,1,0.5],interpolation="none", aspect="auto")
-    # x = np.arange(0,0.5,0.01)
-    # y = 1 - x
-    # plt.plot(x,y)
 
     X, Y = np.meshgrid(p_range, q_range)
     num = 10
@@ -49,7 +41,7 @@ def plot_posterior():
 
     obj = Diff_Coverage(flip_p=p, flip_q=q, candidate_num=candidate,
                                    plc_num=plc_num, people=people, k_favor=k_favor, max_iter=4000,
-                                   data_src="SG", uniform=False, freeze=False, skew=skew, random_start=1)
+                                   data_src="MCS", uniform=False, freeze=False, skew=skew, random_start=1)
     obj.train(use_grad=True)
     X_u=range(0,9)
     def f(p,q,x):
@@ -77,8 +69,36 @@ def plot_posterior():
     plt.show()
 
 
+def plot_optim(name="log2.txt"):
+    with open(name,'r') as f:
+        lines = f.readlines()
+        lines = [l.strip('\n') for l in lines]
+        lines = [l.split(' ') for l in lines]
+    loss = np.array([float(l[0]) for l in lines])
+    p = np.array([float(l[1]) for l in lines])
+    index = np.argsort(p)
+    p = p[index]
+    loss = loss[index]
+    plt.plot(p,loss)
+    plt.title("Stepsize: 0.01")
+    plt.ylabel("Loss: P(0|X)")
+    plt.xlabel("p:Prob(0->1)")
+    plt.show()
 
+def cal_bound(name='new_log.txt'):
+    with open(name, 'r') as f:
+        lines = f.readlines()
+        lines = [eval(l) for l in lines if '#' not in l]
+    for l in lines:
+        arr = [tup[0] for tup in l]
+        arr = (np.array(arr) - arr[3]) / (arr[3]+0.0)*100
+        print arr
 
+def plot_range():
+    pass    
 if __name__ == '__main__':
     # plot_epsilon()
-    plot_posterior()
+    # plot_posterior()
+    plot_optim()
+    # cal_bound()
+    # plot_range()
