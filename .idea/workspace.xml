@@ -2,15 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8041fbc9-20b6-4569-9356-857f8562104d" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/optimizer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/try_p_0.01.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/optim_coverage.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/diff_privacy_test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/diff_privacy_test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Untitled.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Untitled.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/0_0.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/XY.npz" beforeDir="false" afterPath="$PROJECT_DIR$/XY.npz" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comb_mat.npy" beforeDir="false" afterPath="$PROJECT_DIR$/comb_mat.npy" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/diff_coverage.py" beforeDir="false" afterPath="$PROJECT_DIR$/diff_coverage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/log2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/new_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/optimizer.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/read_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simu.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/try_p_0.01.log" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -21,8 +31,9 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/diff_privacy_test$util.coverage" NAME="util Coverage Results" MODIFIED="1526296747167" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/diff_privacy_test$untitled.coverage" NAME="untitled Coverage Results" MODIFIED="1526296852756" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/diff_privacy_test$optim_coverage.coverage" NAME="optim_coverage Coverage Results" MODIFIED="1528857986782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/diff_privacy_test$util.coverage" NAME="util Coverage Results" MODIFIED="1527842883129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/diff_privacy_test$untitled.coverage" NAME="untitled Coverage Results" MODIFIED="1527842951358" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/diff_privacy_test$read_data.coverage" NAME="read_data Coverage Results" MODIFIED="1523969226788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="DatabaseView">
@@ -41,16 +52,38 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="diff_coverage.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/diff_coverage.py">
+      <file leaf-file-name="optim_coverage.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/optim_coverage.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
-              <caret line="762" column="19" selection-start-line="762" selection-start-column="19" selection-end-line="762" selection-end-column="19" />
+            <state relative-caret-position="351">
+              <caret line="389" column="30" selection-start-line="389" selection-start-column="30" selection-end-line="389" selection-end-column="30" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
-                <element signature="e#13120#16071#0" />
-                <element signature="e#16177#17323#0" />
-                <element signature="e#17378#19472#0" />
+                <element signature="e#9428#10356#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="16" column="44" lean-forward="true" selection-start-line="16" selection-start-column="44" selection-end-line="16" selection-end-column="44" />
+              <folding>
+                <element signature="e#0#32#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="read_data.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/read_data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-130">
+              <caret line="40" column="59" selection-start-line="40" selection-start-column="59" selection-end-line="40" selection-end-column="59" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -59,31 +92,10 @@
       <file leaf-file-name="util.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/util.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="290">
-              <caret line="90" column="55" selection-start-line="90" selection-start-column="55" selection-end-line="90" selection-end-column="55" />
+            <state relative-caret-position="2340">
+              <caret line="156" column="20" selection-start-line="156" selection-start-column="20" selection-end-line="156" selection-end-column="20" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="new_log.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/new_log.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" selection-start-line="14" selection-end-line="14" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="read_data.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/read_data.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
-              <caret line="45" column="25" selection-start-line="45" selection-start-column="25" selection-end-line="45" selection-end-column="25" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -100,7 +112,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>k_favor</find>
       <find>people</find>
       <find>self.xi</find>
       <find>16371767</find>
@@ -130,6 +141,7 @@
       <find>self.xi = np.sum</find>
       <find>update_prior</find>
       <find>print</find>
+      <find>eps</find>
     </findStrings>
     <replaceStrings>
       <replace>upper_bound</replace>
@@ -152,10 +164,12 @@
         <option value="$PROJECT_DIR$/0_0.txt" />
         <option value="$PROJECT_DIR$/optimizer.py" />
         <option value="$PROJECT_DIR$/try_p_0.01.log" />
-        <option value="$PROJECT_DIR$/read_data.py" />
-        <option value="$PROJECT_DIR$/util.py" />
         <option value="$PROJECT_DIR$/new_log.txt" />
+        <option value="$PROJECT_DIR$/util.py" />
         <option value="$PROJECT_DIR$/diff_coverage.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/read_data.py" />
+        <option value="$PROJECT_DIR$/optim_coverage.py" />
       </list>
     </option>
   </component>
@@ -219,7 +233,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.untitled">
+  <component name="RunManager" selected="Python.optim_coverage">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="diff_privacy_test" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -239,6 +253,25 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="optim_coverage" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="diff_privacy_test" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/optim_coverage.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <configuration name="read_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="diff_privacy_test" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -255,6 +288,25 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/read_data.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="diff_privacy_test" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
@@ -427,9 +479,13 @@
       <item itemvalue="Python.untitled" />
       <item itemvalue="Python.read_data" />
       <item itemvalue="Python.util" />
+      <item itemvalue="Python.test" />
+      <item itemvalue="Python.optim_coverage" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.optim_coverage" />
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.untitled" />
         <item itemvalue="Python.util" />
         <item itemvalue="Python.read_data" />
@@ -451,25 +507,24 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="13" weight="0.32965517" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3048276" />
+      <window_info anchor="bottom" id="Version Control" order="13" weight="0.07310345" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.32827586" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3048276" />
-      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32965517" />
       <window_info anchor="right" id="Remote Host" order="3" sideWeight="0.4989733" weight="0.32956383" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4940476" visible="true" weight="0.18739903" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4920635" visible="true" weight="0.21163167" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="7" weight="0.32956383" />
-      <window_info anchor="right" x="0" y="22" width="1280" height="778" id="SciView" order="4" sideWeight="0.4920635" weight="0.3990307" />
-      <window_info id="Structure" order="1" sideWeight="0.50595236" side_tool="true" weight="0.18739903" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="right" x="0" y="22" width="1280" height="778" id="SciView" order="4" sideWeight="0.4920635" weight="0.36591277" />
+      <window_info id="Structure" order="1" sideWeight="0.50793654" side_tool="true" weight="0.20516963" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3986207" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="12" visible="true" weight="0.32876712" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Coverage" order="5" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -478,11 +533,37 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32965517" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="12" visible="true" weight="0.32876712" />
+      <window_info anchor="right" id="Coverage" order="5" side_tool="true" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -491,19 +572,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/util.py</url>
-          <line>76</line>
-          <option name="timeStamp" value="89" />
+          <url>file://$PROJECT_DIR$/optim_coverage.py</url>
+          <line>329</line>
+          <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/diff_coverage.py</url>
-          <line>678</line>
-          <option name="timeStamp" value="93" />
+          <url>file://$PROJECT_DIR$/optim_coverage.py</url>
+          <line>373</line>
+          <option name="timeStamp" value="124" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/diff_coverage.py</url>
-          <line>471</line>
-          <option name="timeStamp" value="95" />
+          <url>file://$PROJECT_DIR$/optim_coverage.py</url>
+          <line>389</line>
+          <option name="timeStamp" value="125" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -513,55 +594,58 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="98" />
+      <option name="time" value="126" />
     </breakpoint-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateCodeFragment">
       <expression>
-        <expression-string>plt.imshow(sum_row-party)
-plt.show()</expression-string>
+        <expression-string>true_opt_party[true_opt_party!=0]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>plt.imshow(eliminate)
-plt.show()</expression-string>
+        <expression-string>fake_opt_party[fake_opt_party!=0]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>self.a</expression-string>
+        <expression-string>fake_opt_party</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>self.a[plc_id] = coeffs[0]</expression-string>
+        <expression-string>choice</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>coeffs[0]</expression-string>
+        <expression-string>sum_row</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>new_simulation.xi.shape</expression-string>
+        <expression-string>self.xi.shape</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>new_simulation.xi</expression-string>
+        <expression-string>sample.shape</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>np.sum(np.sum(fake_sample[fake_choice,:], axis=0) &gt; 0)</expression-string>
+        <expression-string>np.argmax(person_contrib)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>np.sum(np.sum(true_sample[fake_choice,:], axis=0) &gt; 0)</expression-string>
+        <expression-string>np.where(true_sample[5,:]==1)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>true_sample[5,:]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
@@ -615,49 +699,71 @@ plt.show()</expression-string>
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/travel_plan">
+    <entry file="file://$PROJECT_DIR$/util.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="74235">
-          <caret line="4949" column="8" selection-start-line="4949" selection-start-column="8" selection-end-line="4949" selection-end-column="14" />
+        <state relative-caret-position="2325">
+          <caret line="156" column="20" selection-start-line="156" selection-start-column="20" selection-end-line="156" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/read_data.py">
+    <entry file="file://$PROJECT_DIR$/optim_coverage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1905">
-          <caret line="129" selection-start-line="129" selection-end-line="129" />
+        <state relative-caret-position="270">
+          <caret line="18" column="32" lean-forward="true" selection-start-line="18" selection-start-column="32" selection-end-line="18" selection-end-column="32" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#9428#10356#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/diff_coverage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="13" lean-forward="true" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+        <state relative-caret-position="315">
+          <caret line="21" column="23" lean-forward="true" selection-start-line="21" selection-start-column="23" selection-end-line="21" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2325">
+          <caret line="156" column="20" selection-start-line="156" selection-start-column="20" selection-end-line="156" selection-end-column="20" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
-            <element signature="e#13120#16071#0" />
-            <element signature="e#16177#17323#0" />
-            <element signature="e#17378#19472#0" />
+            <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/read_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="4" column="24" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
+        <state relative-caret-position="555">
+          <caret line="40" column="60" selection-start-line="40" selection-start-column="60" selection-end-line="40" selection-end-column="60" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/simulation/6_4.json" />
-    <entry file="file://$PROJECT_DIR$/simulation/6_3.json" />
-    <entry file="file://$PROJECT_DIR$/simulation/6_2.json" />
+    <entry file="file://$PROJECT_DIR$/read_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2370">
+          <caret line="161" selection-start-line="161" selection-end-line="161" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/social_graph">
+      <provider selected="true" editor-type-id="LargeFileEditor">
+        <state relative-caret-position="62940">
+          <caret line="3697" column="1404" selection-start-line="3697" selection-start-column="1395" selection-end-line="3697" selection-end-column="1404" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/simulation/6_1.json" />
     <entry file="file://$PROJECT_DIR$/simulation/17_11.json" />
     <entry file="file://$PROJECT_DIR$/simulation/17_8.json" />
@@ -684,25 +790,6 @@ plt.show()</expression-string>
     <entry file="file://$PROJECT_DIR$/0_9.json" />
     <entry file="file://$PROJECT_DIR$/0_18.json" />
     <entry file="file://$PROJECT_DIR$/0_19.json" />
-    <entry file="file://$PROJECT_DIR$/social_graph">
-      <provider selected="true" editor-type-id="LargeFileEditor">
-        <state relative-caret-position="178175">
-          <caret line="3697" column="1404" selection-start-line="3697" selection-start-column="1395" selection-end-line="3697" selection-end-column="1404" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/social_graph.json">
-      <provider selected="true" editor-type-id="LargeFileEditor">
-        <state relative-caret-position="-1754" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/social_dict.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="141">
-          <caret line="68880" column="21" selection-start-line="68880" selection-start-column="14" selection-end-line="68880" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/travel_plan_clean.json" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -719,13 +806,7 @@ plt.show()</expression-string>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/single_test/SG_0_1.json" />
-    <entry file="file://$PROJECT_DIR$/0_0.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="80" selection-start-line="10" selection-start-column="80" selection-end-line="10" selection-end-column="80" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/0_0.txt" />
     <entry file="file://$USER_HOME$/anaconda2/lib/python2.7/site-packages/scipy/optimize/optimize.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
@@ -733,80 +814,75 @@ plt.show()</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/optimizer.py">
+    <entry file="file://$PROJECT_DIR$/try_p_0.01.log" />
+    <entry file="file://$PROJECT_DIR$/log" />
+    <entry file="file://$PROJECT_DIR$/new_log.txt" />
+    <entry file="file://$PROJECT_DIR$/social_dict.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="2" column="14" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="21" />
+        <state relative-caret-position="2967">
+          <caret line="68880" column="21" selection-start-line="68880" selection-start-column="14" selection-end-line="68880" selection-end-column="21" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/social_graph">
+      <provider selected="true" editor-type-id="LargeFileEditor">
+        <state relative-caret-position="62940">
+          <caret line="3697" column="1404" selection-start-line="3697" selection-start-column="1395" selection-end-line="3697" selection-end-column="1404" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/optimizer.py" />
     <entry file="file://$USER_HOME$/anaconda2/lib/python2.7/multiprocessing/pool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
+        <state relative-caret-position="860">
           <caret line="245" column="8" selection-start-line="245" selection-start-column="8" selection-end-line="245" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/try_p_0.01.log">
-      <provider selected="true" editor-type-id="LogFileEditorProvider">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="607">
-          <caret line="48" column="18" selection-start-line="48" selection-start-column="18" selection-end-line="48" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/log.txt">
+    <entry file="file://$PROJECT_DIR$/diff_coverage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/log">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/read_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
-          <caret line="45" column="25" selection-start-line="45" selection-start-column="25" selection-end-line="45" selection-end-column="25" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-1">
+          <caret line="14" column="11" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="11" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/util.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="290">
-          <caret line="90" column="55" selection-start-line="90" selection-start-column="55" selection-end-line="90" selection-end-column="55" />
+        <state relative-caret-position="2340">
+          <caret line="156" column="20" selection-start-line="156" selection-start-column="20" selection-end-line="156" selection-end-column="20" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/new_log.txt">
+    <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
+        <state relative-caret-position="240">
+          <caret line="16" column="44" lean-forward="true" selection-start-line="16" selection-start-column="44" selection-end-line="16" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/diff_coverage.py">
+    <entry file="file://$PROJECT_DIR$/read_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="762" column="19" selection-start-line="762" selection-start-column="19" selection-end-line="762" selection-end-column="19" />
+        <state relative-caret-position="-130">
+          <caret line="40" column="59" selection-start-line="40" selection-start-column="59" selection-end-line="40" selection-end-column="59" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/optim_coverage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="389" column="30" selection-start-line="389" selection-start-column="30" selection-end-line="389" selection-end-column="30" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
-            <element signature="e#13120#16071#0" />
-            <element signature="e#16177#17323#0" />
-            <element signature="e#17378#19472#0" />
+            <element signature="e#9428#10356#0" />
           </folding>
         </state>
       </provider>

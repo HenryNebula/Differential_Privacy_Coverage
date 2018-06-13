@@ -69,7 +69,7 @@ def plot_posterior():
     plt.show()
 
 
-def plot_optim(name="log2.txt"):
+def plot_optim(name="log.txt"):
     with open(name,'r') as f:
         lines = f.readlines()
         lines = [l.strip('\n') for l in lines]
@@ -79,9 +79,9 @@ def plot_optim(name="log2.txt"):
     index = np.argsort(p)
     p = p[index]
     loss = loss[index]
-    plt.plot(p,loss)
+    plt.plot(p,900-loss)
     plt.title("Stepsize: 0.01")
-    plt.ylabel("Loss: P(0|X)")
+    plt.ylabel("Posterior")
     plt.xlabel("p:Prob(0->1)")
     plt.show()
 
@@ -94,11 +94,69 @@ def cal_bound(name='new_log.txt'):
         arr = (np.array(arr) - arr[3]) / (arr[3]+0.0)*100
         print arr
 
-def plot_range():
-    pass    
+
+def easy_draw(d=None,fpath='change_prior/'):
+    if d is None:
+        with open(fpath + "simu.json", 'r') as f:
+            d = json.loads(f.read())
+    dataset_num = d['dataset_num']
+    method_num = d['method_num']
+    # method_num = 3
+    iter_per_set = d['iter_per_set']
+    dir_name = d['dir_name']
+    data_src = d['data_src']
+    marker = d['change_paras']
+    # title = d['title']
+
+    #     marker = ['cand=30','cand=60','cand=90','cand=120']
+    #     marker = ['k=10','k=20','k=30']
+    #     marker  ['cand=40','cand=42','cand=44']
+
+    color = ['y', 'c', 'b', 'r', 'm', 'k']
+    Results = np.zeros((dataset_num, method_num, iter_per_set))
+    Stats = np.zeros((dataset_num, method_num, 2))  # 0 for mean, 1 for std
+
+    for i in range(0, dataset_num):
+        for j in range(0, iter_per_set):
+            with open(dir_name + '/' + data_src + '_' +
+                      str(i) + '_' + str(j) + ".json", 'r') as f:
+                results = json.loads(f.read())
+                for m in range(0, method_num):
+                    Results[i, m, j] = results[m][0]
+
+    for i in range(0, dataset_num):
+        for m in range(0, method_num):
+            Stats[i, m, 0] = np.mean(Results[i, m, :])
+            Stats[i, m, 1] = np.std(Results[i, m, :])
+
+    print Stats[0, 0, 1]
+    ind = np.arange(dataset_num)
+    width = 0.2
+    p_list = []
+    for m in range(0, method_num):
+        if method_num % 2 != 0:
+            bias = np.floor(method_num / 2)
+        else:
+            bias = (method_num - 1.0) / 2
+        p = plt.bar(ind + width * (m - bias), Stats[:, m, 0], width=width, color=color[m], yerr=Stats[:, m, 1])
+        p_list.append(p)
+
+    plt.xticks(ind, marker)
+    # plt.ylim(500, 650)
+    tup = tuple([p[0] for p in p_list])
+    plt.legend(tup, ("No Noise","Greedy", "Noisy", "Random"))
+    plt.ylabel("Num of Covered Targets")
+    # if 'title' in d.keys():
+    #     plt.title(d['title'])
+    # else:
+    #     plt.title(d['data_src'])
+    plt.savefig(fpath + d['pic_name'])
+    plt.show()
+
 if __name__ == '__main__':
     # plot_epsilon()
     # plot_posterior()
-    plot_optim()
+    # plot_optim()
     # cal_bound()
     # plot_range()
+    easy_draw(fpath='test/')

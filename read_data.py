@@ -38,12 +38,12 @@ def init_pick(bit_array,candidate,random_start=5):
 
 # mobile crowdsourcing
 class MCS():
-    def __init__(self, k_favor, people, xrange=30, yrange=30):
+    def __init__(self, k_favor, people, xrange=50, yrange=50):
         self.k_favor = k_favor
         self.people = people
         # scaling paras for crowdsourcing dataset
-        self.x_granu = 0.1
-        self.y_granu = 0.1
+        self.x_granu = 0.01
+        self.y_granu = 0.01
         self.xrange = xrange
         self.yrange = yrange
 
@@ -113,9 +113,6 @@ class SG():
     def __init__(self, k_favor, people, max_id=10000):
         self.k_favor = k_favor
         self.people = people
-        # scaling paras for crowdsourcing dataset
-        self.x_granu = 0.01
-        self.y_granu = 0.01
         self.max_id = max_id
 
     def read_scratch(self):
@@ -159,11 +156,11 @@ class SG():
         for i in range(len(choose)):
             bit_array[i,choose[i][1]] = 1
         # return bit_array[random.sample(range(bit_array.shape[0]), self.people), :]
-        # return bit_array[0:self.people,:]
-        return init_pick(bit_array, self.people)
+        return bit_array[0:self.people,:]
+        # return init_pick(bit_array, self.people)
 
 
-# coontact graph
+# contact graph
 class CG():
     def __init__(self, k_favor, people, max_id=1000):
         self.k_favor = k_favor
