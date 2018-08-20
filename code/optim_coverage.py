@@ -1,7 +1,8 @@
 from __future__ import division
+import matplotlib
+matplotlib.use("Agg")
 from scipy.special import comb
-from scipy.stats import norm
-import os
+from scipy.stats import norm, entropy
 from matplotlib import pyplot as plt
 from multiprocessing import Pool, cpu_count
 from sklearn.linear_model import LinearRegression
@@ -11,7 +12,6 @@ from numpy.linalg import lstsq
 from datetime import datetime
 import scipy.sparse as sparse
 import functools
-# from util import *
 
 def unwrap_self_find_coeffs(arg, **kwarg):
     return Diff_Coverage.find_coeffs(*arg, **kwarg)
@@ -32,7 +32,7 @@ class Diff_Coverage():
 
     def __init__(self, uniform=True, f=0, flip_p=0.001, flip_q = 0.1, data_src="SG",
                  plc_num=200,people=500, candidate_num=50, k_favor=5,
-                 max_iter=200,random_start=5,obfuscate=0, pool_num=2):
+                 max_iter=200,random_start=5,obfuscate=0, granu=0.2):
         # constants in rappor
         self.f = f
         self.p = flip_p
@@ -49,7 +49,7 @@ class Diff_Coverage():
         self.data_source = data_src
 
         # constants in iteration
-        self.comb_mat = np.load('comb_mat.npy')
+        self.comb_mat = np.load(pre_compute_dir + 'comb_mat.npy')
         self.iter = max_iter
 
         # paras for regression: a for slope, b for intersect
@@ -62,13 +62,15 @@ class Diff_Coverage():
         self.random_start = random_start
         self.obfuscate = obfuscate
 
+        self.granu = granu
+
     # make table for combination numbers
     def make_table(self):
-        comb_mat = np.zeros((self.candidate_num + 1, self.candidate_num + 1))
+        comb_mat = np.zeros((1000 + 1, 1000 + 1))
         for i in range(0, self.candidate_num + 1):
             for j in range(0, i + 1):
                 comb_mat[i][j] = comb(i, j)
-        np.save('comb_mat', comb_mat)
+        np.save(pre_compute_dir + 'comb_mat', comb_mat)
 
     def posterior_core(self, X, xi):
         p_0 = self.p - 0.5 * self.f * (self.p - self.q)
@@ -127,22 +129,32 @@ class Diff_Coverage():
 
     def real_sample(self, draw=False):
         if self.data_source == "MCS":
-            rd = MCS(k_favor=self.k_favor, people=self.people)
-            sample = rd.make_grid()
-            self.plc_num = rd.plc_num
+            print "[Warning] Using MCS dataset, people and place number setting will be ignored"
+            rd = MCS(k_favor=self.k_favor, x_granu=self.granu, y_granu=self.granu)
+            sample = rd.read_scratch(draw=draw)
+            self.people, self.plc_num = sample.shape
+
         elif self.data_source == "SG":
-            rd = SG(k_favor=self.k_favor, people=self.people, max_id=self.plc_num)
+            rd = SG(k_favor=self.k_favor, max_id=self.plc_num)
             sample = rd.make_grid()
+            self.people = sample.shape[0]
         else:
             rd = CG(k_favor=self.k_favor, people=self.people, max_id=self.plc_num)
             sample = rd.make_grid()
 
-        print "Total recruit: ", self.people, " from places: ", self.plc_num
+        print "Data source:{0}, p:{1}, people:{2}, candidate:{3}, k_favor:{4}".format(
+            self.data_source, self.p, self.people, self.candidate_num, self.k_favor)
+
         self.update_prior(sample)
         if draw:
             row_sum = np.sum(sample, axis=0)
-            plt.plot(np.arange(0, self.plc_num), row_sum)
-            plt.show()
+            idx = range(np.max(row_sum)+1)
+            count = [0] * len(idx)
+            for s in row_sum:
+                count[s] += 1
+            plt.loglog(idx, count)
+            print 'plot it'
+            plt.savefig('self-xi.png')
         return sample
 
     # create "fake" dataset after random response
@@ -163,7 +175,7 @@ class Diff_Coverage():
             plt.plot(np.arange(0, self.plc_num), row_sum)
             plt.show()
 
-        print "Finish Flipping, Transfer Data prepared"
+        # print "Finish Flipping, Transfer Data prepared"
         return trans_sample
 
     # sum posterior in terms of locations
@@ -196,7 +208,7 @@ class Diff_Coverage():
                 # lr = LinearRegression()
                 # lr.fit(X_range, ans)
                 # coef = lr.coef_, lr.intercept_
-                coef = lstsq(X_range, ans)[0]
+                coef = lstsq(X_range, ans, rcond=None)[0]
             return coef
 
     def posterior_regression(self, draw=False):
@@ -223,7 +235,7 @@ class Diff_Coverage():
                 prior_list.append(xi)
                 count += 1
             plc_index[plc_id] = prior_dict[xi]
-        print "Total different prior: ", len(prior_dict)
+        # print "Total different prior: ", len(prior_dict)
         pool = Pool(processes=cpu_count() * 2)
         coef_list = pool.map(unwrap_self_find_coeffs, zip([self]*len(prior_list), prior_list))
         for plc_id in range(self.plc_num):
@@ -233,11 +245,18 @@ class Diff_Coverage():
         print "Linear Regression over"
 
     def grad_boosting(self, sum_row, party, unused):
-        top_k = 1
 
-        grad_ = abs(self.a * np.exp(self.b) * np.exp(self.a * sum_row)).T
-        grad_ = sparse.csr_matrix(grad_)
+        def compute_grad(sum_):
+            grad_ = abs(self.a * np.exp(self.b) * np.exp(self.a * sum_row)).T
+            # change to KL-divergence
+            # grad_ *= (self.a * sum_row + self.b + 1 - np.log(1 / self.plc_num))
+            grad_ = sparse.csr_matrix(grad_)
+            return grad_
+
+
+        top_k = 1
         sparse_party = sparse.csr_matrix(party)
+        grad_ = compute_grad(sum_row)
         candidate_sub = sparse_party * grad_.T
         if top_k == 1:
             id_of_r = [np.argmin(candidate_sub)]
@@ -247,9 +266,7 @@ class Diff_Coverage():
         # re-calculate grad_ using party after removing a candidate
         party[id_of_r,:] = 0
         sum_row = np.sum(party, axis=0)
-        grad_ = abs(self.a * np.exp(self.b) * np.exp(self.a * sum_row)).T
-
-        grad_ = sparse.csr_matrix(grad_)
+        grad_ = compute_grad(sum_row)
         sparse_unused = sparse.csr_matrix(unused)
         candidate_add = sparse_unused * grad_.T
         # return their sequential id, not original id in sample
@@ -309,8 +326,8 @@ class Diff_Coverage():
             past_tup = ()
             if use_grad:
                 for i in range(0, self.iter):
-                    if i % 100 == 0:
-                        print '[{0}] Iteration:{1}'.format(datetime.now(), i)
+                    # if i % 100 == 0:
+                        # print '[{0}] Iteration:{1}'.format(datetime.now(), i)
                     diff, id_of_r, id_of_r_ = self.grad_boosting(sum_row, party, unused)
                     r = choice[id_of_r]
                     r_ = not_choice[id_of_r_]
@@ -322,7 +339,7 @@ class Diff_Coverage():
                             past_tup = (set(r), set(r_))
                             same_count = 0
                         if same_count >= 3:
-                            print "Stop iteration at: ", i
+                            # print "Stop iteration at: ", i
                             break
                         choice[id_of_r] = r_
                         not_choice[id_of_r_] = r
@@ -360,7 +377,7 @@ class Diff_Coverage():
 
             # total_sum = self.sum_posterior(sum_row)
             total_sum = 0
-            print 'Finish:', total_sum, same_count, "Random start: ", times
+            print 'Finish Iter_{}'.format(times)
             if total_sum < min_loss:
                 min_loss = total_sum
                 final_choice = choice
@@ -373,8 +390,8 @@ class Diff_Coverage():
         old_sum = 0
         true_sample = sparse.lil_matrix(ts.copy())
         while count <= self.candidate_num:
-            if count % 100 == 0:
-                print '[{0}] Iteration:{1}'.format(datetime.now(), count)
+            # if count % 100 == 0:
+                # print '[{0}] Iteration:{1}'.format(datetime.now(), count)
             person_contrib = true_sample.sum(axis=1)
             id_ = np.argmax(person_contrib)
             new_plcs = true_sample[int(id_), :].tocsr()
@@ -396,25 +413,66 @@ class Diff_Coverage():
 
     # compare with two baseline: use "fake data" directly and greedy random search
     def validate(self,true_sample, trans_sample, choice, times=1):
+
+        def plot_by_loc(choice_list):
+
+            def plot_core(ax, sum_, legend, max_=50):
+                # sum_ = sorted(sum_, reverse=True)
+                ax.plot(range(self.plc_num), sum_,
+                                 label=legend + '_{0:.3f}'.format(entropy(sum_, uniform)), )
+                ax.set_ylim((0, max_))
+                ax.legend()
+
+            legends = ['perfect','optim', 'noisy','random']
+            uniform = np.array([1] * self.plc_num)
+            fig, (real_axs, post_axs, trans_axs) = plt.subplots(nrows=3, ncols=4)
+
+            for i, choice in enumerate(choice_list):
+                real_sum = np.sum(true_sample[choice,:], axis=0)
+                trans_sum = np.sum(trans_sample[choice,:], axis=0)
+                post = np.exp(self.a * trans_sum + self.b)
+
+                plot_core(real_axs[i], real_sum, legends[i])
+                plot_core(post_axs[i], post, legends[i],max_=1)
+                plot_core(trans_axs[i], trans_sum, legends[i])
+
+
+            # plt.tight_layout()
+            plt.show()
+
+
+
         result = []
-        print 'Perfect Baseline'
+        choice_list = []
+
         max_sum, final_choice = self.perfect_baseline(true_sample)
+        choice_list.append(final_choice)
         result.append((max_sum, len(np.where(self.xi > 0)[0])))
 
         true_opt_party = true_sample[choice, :]
         fake_opt_party = trans_sample[choice, :]
-        sum_row = np.sum(fake_opt_party, axis=0)
+
+        choice_list.append(choice)
+
+        # sum_row = np.sum(fake_opt_party, axis=0)
         # total_sum_opt = self.sum_posterior(sum_row)
         total_sum_opt = 0
         coverage_opt = np.sum(np.sum(true_opt_party, axis=0) > 0)
         result.append((coverage_opt, total_sum_opt))
+
+        noisy_result = []
+        random_result = []
         for i in range(times):
             max_sum, final_choice = self.perfect_baseline(trans_sample)
+            choice_list.append(final_choice)
             final_party = true_sample[final_choice, :]
             real_sum = np.sum(np.sum(final_party, axis=0) > 0)
-            result.append((real_sum, max_sum))
+            noisy_result.append(real_sum)
+
 
             rand_choice = random.sample(range(self.people), self.candidate_num)
+            choice_list.append(rand_choice)
+
             true_rand_party = true_sample[rand_choice, :]
             fake_rand_party = trans_sample[rand_choice, :]
 
@@ -423,90 +481,34 @@ class Diff_Coverage():
             # total_sum_rand = self.sum_posterior(sum_row)
             total_sum_rand = 0
             coverage_rand = np.sum(np.sum(true_rand_party, axis=0) > 0)
-            result.append((coverage_rand, total_sum_rand))
+            random_result.append(coverage_rand)
 
-        # first element is opt, second is random-greedy, third is fake-data
-        return result
+        result.append((np.mean(noisy_result), max_sum))
+        result.append((np.mean(random_result), 0))
 
-
-def simulate_pipeline(change_k=False, change_p=False, change_cand=False, change_prior=False, opt=False):
-    if change_k:
-        changed_paras = range(10, 40, 10)
-        dir_name = 'change_k'
-    elif change_p:
-        changed_paras = [0.003, 0.05, 0.281]
-        dir_name = 'change_p'
-    elif change_cand:
-        changed_paras = [1000, 800, 600, 400, 200]
-        dir_name = 'change_cand'
-    elif change_prior:
-        changed_paras = [0, 0.01, 0.1]
-        dir_name = 'change_prior'
-    else:
-        dir_name = 'test'
-        changed_paras = [0]
-
-    try:
-        os.listdir(dir_name)
-    except OSError:
-        os.mkdir(dir_name)
-
-    dataset_num = len(changed_paras)
-    iter_per_set = 1
-
-    plc_num = 900
-    people = 6000
-    candidate = 1500
-    k_favor = 3
-    obfuscate = 5
-    eps = 4
-    p = 2e-2
-    q = 1.0 / ((1.0 - p) / (p * np.exp(eps)) + 1)
-
-    data_src = 'MCS'
-    print "Data source:{0}, p:{1}, eps:{2}, candidate:{3}, k_favor:{4}".format(data_src, p, eps, candidate, k_favor)
-
-    d = {'title': dir_name, 'dataset_num': dataset_num, 'method_num': 4, 'iter_per_set': iter_per_set,
-         'dir_name': dir_name, 'change_paras': changed_paras, 'data_src': data_src}
-    d['pic_name'] = d['data_src'] + '_' + str(eps) + '_' + d['dir_name'] + '.png'
-    with open(d['dir_name'] + '/simu.json', 'w') as f:
-        f.write(json.dumps(d))
-
-    for i in range(0, dataset_num):
-        print "Start a new set!"
-        if change_k:
-            k_favor = changed_paras[i]
-        elif change_cand:
-            candidate = changed_paras[i]
-        elif change_p:
-            p = changed_paras[i]
-            q = 1.0 / ((1.0 - p) / (p * np.exp(eps)) + 1)
-        elif change_prior:
-            obfuscate = changed_paras[i]
-
-        new_dataset = (i == 0) or ((i > 0) and (change_k or change_cand))
-        old_set_new_trans = (i > 0) and change_p
-        new_simulation = Diff_Coverage(flip_p=p, flip_q=q, candidate_num=candidate,
-                                       plc_num=plc_num, people=people, k_favor=k_favor, max_iter=4000,
-                                       data_src=data_src, uniform=False, random_start=1, obfuscate=obfuscate)
-        if new_dataset:
-            true_sample = new_simulation.real_sample()
-            trans_sample = new_simulation.transfer_sample(true_sample)
-        else:
-            if old_set_new_trans:
-                trans_sample = new_simulation.transfer_sample(true_sample)
-        # if obfuscate:
-        #     new_simulation.update_prior(true_sample)
-
-        for j in range(iter_per_set):
-            choice = new_simulation.train(trans_sample=trans_sample)
-            result = new_simulation.validate(true_sample, trans_sample, choice, times=1)
-            print result
-            with open(dir_name + '/' + new_simulation.data_source + '_' +
-                      str(i) + '_' + str(j) + ".json", 'w') as f:
-                f.write(json.dumps(result))
+        # first element is no_privacy, second is our alg, third is fake-data, last is random
+        percentile = np.array([r[0] for r in result])
+        percentile = percentile / percentile[-1]
+        # plot_by_loc(choice_list)
+        return result, percentile
 
 
-if __name__ == '__main__':
-    simulate_pipeline()
+
+# eps = 4
+# p = 0.02
+# q = 1.0 / ((1.0 - p) / (p * np.exp(eps)) + 1)
+# new_simulation = Diff_Coverage(flip_p=p, flip_q=q, candidate_num=680,
+#                             plc_num=2000, people=2000, k_favor=5, max_iter=4000,
+#                             data_src='MCS', uniform=False, random_start=1,obfuscate=0, granu=0.02)
+#
+# true_sample = new_simulation.real_sample()
+# trans_sample = new_simulation.transfer_sample(true_sample)
+# #
+# choice = new_simulation.train(trans_sample=trans_sample)
+# # np.save('../data/temp_choice', choice)
+#
+# # choice = np.load('../data/temp_choice.npy')
+#
+# result, percentile = new_simulation.validate(true_sample, trans_sample, choice, times=1)
+# print percentile
 

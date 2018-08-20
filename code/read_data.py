@@ -3,6 +3,24 @@ import random
 import json
 import copy
 
+
+from bokeh.io import output_file, show, export_png
+from bokeh.models import ColumnDataSource, GMapOptions
+from bokeh.plotting import gmap
+from scipy.spatial import KDTree
+
+from datetime import datetime
+from scipy import sparse
+
+MAX_LAT = 40.426
+MIN_LAT = 39.414
+MAX_LON = 117.119
+MIN_LON = 115.686
+
+pre_compute_dir = "../pre-compute/"
+data_dir = "../data/"
+output_dir = "../output/"
+
 def init_pick(bit_array,candidate,random_start=5):
     best_choice = []
     max_cover = 0
@@ -36,92 +54,91 @@ def init_pick(bit_array,candidate,random_start=5):
     return bit_array[best_choice, :]
 
 
+def draw_map(lat, lon, title="MCS"):
+
+    map_options = GMapOptions(lat=0.5*(MAX_LAT + MIN_LAT), lng=0.5*(MAX_LON + MIN_LON), map_type="roadmap", zoom=10)
+    p = gmap("AIzaSyDwekyNM4fOE7byChkNKCgEXklUAn3FA6o", map_options, title="MCS")
+    source = ColumnDataSource(
+        data=dict(lat=lat,
+                  lon=lon)
+    )
+    p.circle(x="lon", y="lat", size=5, fill_color="blue", fill_alpha=0.1, source=source)
+    # export_png(p, output_dir + 'map/' + title + '.png')
+    show(p)
+
 # mobile crowdsourcing
 class MCS():
-    def __init__(self, k_favor, people, xrange=50, yrange=50):
+    def __init__(self, k_favor, x_granu=0.02, y_granu=0.02):
         self.k_favor = k_favor
-        self.people = people
-        # scaling paras for crowdsourcing dataset
-        self.x_granu = 0.01
-        self.y_granu = 0.01
-        self.xrange = xrange
-        self.yrange = yrange
+        self.x_granu = x_granu
+        self.y_granu = y_granu
 
-    def read_scratch(self):
-        with open('travel_plan', 'r') as f:
+    def read_scratch(self, draw=False):
+        # mesh a grid first
+        x = np.arange(start=MIN_LAT, stop=MAX_LAT, step=self.x_granu)
+        y = np.arange(start=MIN_LON, stop=MAX_LON, step=self.y_granu)
+
+        xx, yy = np.meshgrid(x,y)
+        xx, yy = xx.reshape(-1,1), yy.reshape(-1,1)
+        grid = np.hstack((xx,yy))
+        kdtree = KDTree(data=grid,)
+
+        print "{0} Start Loading, x,y granularity:{1}".format(datetime.now(), (self.x_granu, self.y_granu))
+
+        with open(data_dir + 'travel_plan', 'r') as f:
             l = f.readlines()
-        new_l = []
+        loc_list = []
         for line in l:
             line = line.split(';')
-            if len(line) >= self.k_favor:
-                line = [i.split(',') for i in line]
-                line = [(int(float(i[1])/ self.y_granu),
-                         int(float(i[0])/ self.x_granu)) for i in line]
-                new_line = list(set(line))
-                new_line.sort(key=line.index)
-                if len(new_line) >= self.k_favor:
-                    # new_l.append(new_line[0:self.k_favor])
-                    new_l.append(new_line[-self.k_favor:])
-        X_coordinate = np.zeros((len(new_l), self.k_favor))
-        Y_coordinate = np.zeros((len(new_l), self.k_favor))
-        for id in range(0, len(new_l)):
-            for pos_id in range(0, self.k_favor):
-                X_coordinate[id, pos_id] = new_l[id][pos_id][0]
-                Y_coordinate[id, pos_id] = new_l[id][pos_id][1]
-        X_med = np.median(X_coordinate)
-        Y_med = np.median(Y_coordinate)
-        choice = []
-        for id in range(0, len(new_l)):
-            if np.all(X_coordinate[id,:] <= X_med + self.xrange) and\
-                    np.all(X_coordinate[id,:] > X_med - self.xrange):
-                if np.all(Y_coordinate[id,:] <= Y_med + self.yrange) and\
-                        np.all(Y_coordinate[id,:] > Y_med - self.yrange):
-                    choice.append(id)
-        X = X_coordinate[choice,:]
-        X = X - np.min(X)
-        Y = Y_coordinate[choice,:]
-        Y = Y - np.min(Y)
-        X_range = 2 * self.xrange
-        Y_range = 2 * self.yrange
-        np.savez("XY",X=X, Y=Y,X_range=X_range, Y_range=Y_range)
+            # user_visit = {ind: count}
+            user_visit = {}
+            line = [i.split(',') for i in line]
+            # (lat, lon)
+            line = [(float(i[1]),float(i[0])) for i in line]
+            for loc in line:
+                if loc[0] > MIN_LAT and loc[0] < MAX_LAT and loc[1] > MIN_LON and loc[1] < MAX_LON:
+                    dis, ind = kdtree.query(np.array(loc))
+                    if ind in user_visit.keys():
+                        user_visit[ind] += 1
+                    else:
+                        user_visit[ind] = 1
+            if len(user_visit.items()) >= self.k_favor:
+                # most frequent visit is chosen
+                ordered_visit = sorted(user_visit.items(), key=lambda x: x[1], reverse=True)
+                inds, counts = zip(*ordered_visit)
+                loc_list.extend(inds[0:self.k_favor])
 
-    def make_grid(self):
-        self.read_scratch()
-        with np.load("XY.npz") as data:
-            X = data["X"]
-            Y = data["Y"]
-            X_range = data["X_range"]
-            Y_range = data["Y_range"]
+        print "{0} Finish fitting to the grid, valid visit records: {1}".format(datetime.now(), len(loc_list))
 
-        if self.people > X.shape[0]:
-            print "Present recruit: ", X.shape[0]
-            print "Require too many people, try reduce people, increase area, decrease k_favor"
-            exit(1)
-        # X_range = np.max(X) + 1
-        # Y_range = np.max(Y) + 1
-        self.plc_num = int(X_range * Y_range)
+        # visualize it
+        if draw:
+            whole_loc = list(kdtree.data[loc_list,:])
+            lats, lons= zip(*whole_loc)
+            draw_map(lats, lons)
 
-        flat_map = Y * X_range + X
-        bit_array = np.full((X.shape[0], self.plc_num), False)
-        for row in range(X.shape[0]):
-            ones = [int(i) for i in list(flat_map[row,:])]
-            bit_array[row, ones] = True
-        print "Data Summary: Row={0}, Col={1}".format(bit_array.shape[0], bit_array.shape[1])
-        return bit_array[range(self.people),:]
-        # return init_pick(bit_array, self.people)
+        loc_list = np.array(loc_list)
+        loc_list = loc_list.reshape(-1,self.k_favor)
+        bit_array = np.full((loc_list.shape[0], grid.shape[0]), False)
+        for row, indice in enumerate(loc_list):
+            bit_array[row, indice] = True
+
+        sparse_bit_array = sparse.csr_matrix(bit_array, dtype=bool)
+        print "{0} Finish Constructing Sparse Matrix, shape {1}, nonzeros {2}".format(datetime.now(),
+                                                                        sparse_bit_array.shape, sparse_bit_array.nnz)
+        return bit_array
+
 
 # social graph
 class SG():
-    def __init__(self, k_favor, people, max_id=10000):
+    def __init__(self, k_favor, max_id=1500):
         self.k_favor = k_favor
-        self.people = people
         self.max_id = max_id
 
     def read_scratch(self):
-        with open("social_graph", 'r') as f:
+        with open(data_dir + "social_graph", 'r') as f:
             l = f.readlines()
         user_list = [list(set(item.strip('\r\n').split(' '))) for item in l]
-        with open("social_graph.json",'w') as f_write:
+        with open(data_dir + "social_graph.json",'w') as f_write:
             f_write.write(json.dumps(user_list,indent=4))
         user_dict = {}
         count = 0
@@ -132,34 +149,63 @@ class SG():
                 else:
                     user_dict[id_] = count
                     count += 1
-        with open("social_dict.json",'w') as f_write:
+        with open(data_dir + "social_dict.json",'w') as f_write:
             f_write.write(json.dumps(user_dict,indent=4))
 
-    def make_grid(self):
-        with open("social_graph.json",'r') as f:
+
+    def popularity(self):
+        with open(data_dir + "social_graph.json",'r') as f:
             user_list = json.loads(f.read())
-        with open("social_dict.json",'r') as f_write:
+
+        with open(data_dir + "social_dict.json",'r') as f_write:
             user_dict = json.loads(f_write.read())
 
+        count_dict = {}
+        for ul in user_list:
+            for user in ul:
+                if count_dict.has_key(user_dict[user]):
+                    count_dict[user_dict[user]] += 1
+                else:
+                    count_dict[user_dict[user]] = 1
+
+        popular = sorted(count_dict.items(), key=lambda x: x[1], reverse=True)
+        with open(data_dir + "popularity.json", 'w') as f:
+            f.write(json.dumps(popular, indent=0))
+
+    def make_grid(self):
+        with open(data_dir + "social_graph.json",'r') as f:
+            user_list = json.loads(f.read())
+        with open(data_dir + "social_dict.json",'r') as f_write:
+            user_dict = json.loads(f_write.read())
+        with open(data_dir + "popularity.json",'r') as f_write:
+            popular = json.loads(f_write.read())
+
         choose = []
+        target_user = popular[0:self.max_id]
+        id_dict = {}
+        for i, t in enumerate(target_user):
+            id_dict[t[0]] = i
+        target_user = set([t[0] for t in target_user])
+
 
         for id_, user in enumerate(user_list):
             if len(user) < self.k_favor:
                 continue
-            user_id = np.array(map(lambda x: user_dict[x], user))
-            user_id = user_id[user_id < self.max_id]
-            if user_id.shape[0] >= self.k_favor:
+            user_id = map(lambda x: user_dict[x], user)
+            user_id = set(user_id).intersection(target_user)
+            user_id = list(user_id)
+            # user_id = user_id[user_id < self.max_id]
+            if len(user_id) >= self.k_favor:
                 choose.append((id_, user_id[0:self.k_favor]))
-        print "Present recruit: ", len(choose)
-        if self.people > len(choose):
-            print "Require too many people, try reduce people or increase max_id"
-            exit(1)
+
         # bit_array = np.zeros((len(choose), self.max_id))
         bit_array = np.full((len(choose), self.max_id), False)
-        for i in range(len(choose)):
-            bit_array[i,choose[i][1]] = 1
+        for i, choice in enumerate(choose):
+            for c in choice[1]:
+                bit_array[i, id_dict[c]] = 1
         # return bit_array[random.sample(range(bit_array.shape[0]), self.people), :]
-        return bit_array[0:self.people,:]
+        print "Current recruited:{0}".format(bit_array.shape[0])
+        return  bit_array
         # return init_pick(bit_array, self.people)
 
 
@@ -220,6 +266,9 @@ class CG():
         return bit_array[0:self.people,:]
 
 
-# cg = CG(k_favor=20, people=1000)
-# # cg.read_scratch()
-# cg.make_grid()
+mcs = MCS(x_granu=0.0175, y_granu=0.0175,k_favor=5)
+mcs.read_scratch(draw=False)
+
+# sg = SG(k_favor=3)
+# sg.popularity()
+# sg.make_grid()
