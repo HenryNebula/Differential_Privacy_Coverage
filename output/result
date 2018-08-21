@@ -1,0 +1,46 @@
+Data source:MCS, p:0.02, eps:4, candidate:1500, k_favor:3
+Start a new set!
+Total recruit:  6000  from places:  10000
+Finish Flipping, Transfer Data prepared
+Total different prior:  55
+Linear Regression over
+Stop iteration at:  1103
+Finish: 0 3 Random start:  0
+Perfect Baseline
+only needs:  1499
+only needs:  150
+[(3115, 3115), (1886, 0), (1754, 10000), (1757, 0)]
+
+Data source:MCS, p:0.002, eps:40, candidate:1500, k_favor:3
+Start a new set!
+Total recruit:  6000  from places:  10000
+Finish Flipping, Transfer Data prepared
+Total different prior:  55
+Linear Regression over
+Stop iteration at:  1041
+Finish: 0 3 Random start:  0
+Perfect Baseline
+only needs:  1499
+only needs:  914
+[(3115, 3115), (2204, 0), (1848, 10000), (1746, 0)]
+
+
+
+
+
+/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 /Users/HenryHuang/Desktop/DataMining/diff_privacy_test/optim_coverage.py
+Data source:SG, p:0.02, eps:4, candidate:1400, k_favor:3
+Start a new set!
+Present recruit:  6301
+Total recruit:  6000  from places:  900
+Finish Flipping, Transfer Data prepared
+Total different prior:  106
+Linear Regression over
+Stop iteration at:  1082
+Finish: 0 3 Random start:  0
+Perfect Baseline
+only needs:  410
+only needs:  64
+[(813, 813), (680, 0), (660, 900), (648, 0)]
+
+Process finished with exit code 0

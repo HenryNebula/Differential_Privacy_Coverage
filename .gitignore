@@ -24,3 +24,7 @@ test/
 *.pptx
 
 XY\.npz
+
+change_prior/
+
+*.npz
