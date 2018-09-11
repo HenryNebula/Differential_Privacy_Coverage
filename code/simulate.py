@@ -4,14 +4,13 @@ from itertools import product
 from multiprocessing import Process
 import time
 
-def simulate_pipeline(candidate, k_favor, p, granu=0.02, plc_num=-1,loc=100, eps=4, hist=False):
+def simulate_pipeline(candidate, k_favor, p, granu=0.02, plc_num=-1, eps=4, hist=False, data_src='MCS'):
     #todo: change optim_coverage parameter "hist" too
     people = -1
     candidate = candidate
     k_favor = k_favor
     p = p
     q = 1.0 / ((1.0 - p) / (p * np.exp(eps)) + 1)
-    data_src = 'MCS'
 
     new_simulation = Diff_Coverage(flip_p=p, flip_q=q, candidate_num=candidate,
                                    plc_num=plc_num, people=people, k_favor=k_favor, max_iter=4000,
@@ -32,7 +31,7 @@ def simulate_pipeline(candidate, k_favor, p, granu=0.02, plc_num=-1,loc=100, eps
         print "Data source:{0}, p:{1}, eps:{2}, candidate:{3}, k_favor:{4}".format(data_src, p, eps, candidate, k_favor)
 
         file_name = "".join([output_dir, data_src, "/k_{0}_cand_{1}_p_{2:2.3f}_loc_{3}_eps_{4}.txt".format(
-            k_favor, candidate, p, loc, eps)])
+            k_favor, candidate, p, plc_num, eps)])
 
     if os.path.exists(file_name):
         print "File already exists for {}".format(file_name)
@@ -58,27 +57,38 @@ if __name__ == '__main__':
 
     data_src = 'SG'
     if data_src == 'SG':
-        simulate_pipeline(1000, 5, p=0.02, granu=0.02, plc_num=-1, loc=100)
+        cands = range(600, 1400, 200)
+        plc_num = range(1000, 2600, 500)
+        p = 0.02
+        eps = 4
+        granu = 0.02
+        k_favor = 5
+        hist = True
+
+        paras = product(cands, k_favor, plc_num, p, granu, eps, hist)
     else:
         cands = range(600,700,400)
         k_favor = [5]
         p = [0.02,1e-3]
         granu = [0.05]
         eps = range(1,11)
+        hist = False
+        plc_num = -1
 
-        paras = product(cands, k_favor, p, granu, eps)
+        paras = product(cands, k_favor, plc_num, p, granu, eps, hist)
         # paras = product(cands, k_favor, p, loc)
-        pcs = []
-        for parameter in paras:
-            cand, k, p, granu, eps = parameter
-            pcs.append(Process(target=simulate_pipeline, kwargs={
-                "candidate":cand,
-                "k_favor": k,
-                "p": p,
-                # "plc_num": loc
-                "granu": granu,
-                "eps": eps,
-            }))
-            pcs[-1].start()
-        for process in pcs:
-            process.join()
+    pcs = []
+    for parameter in paras:
+        cand, k, loc, p, granu, eps, hist = parameter
+        pcs.append(Process(target=simulate_pipeline, kwargs={
+            "candidate":cand,
+            "k_favor": k,
+            "p": p,
+            "plc_num": loc,
+            "granu": granu,
+            "eps": eps,
+            "hist": hist
+        }))
+        pcs[-1].start()
+    for process in pcs:
+        process.join()

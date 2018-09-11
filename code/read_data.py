@@ -161,6 +161,7 @@ class SG():
 
         pop_count = sorted(pop_count.items(), key=lambda x: x[1], reverse=True)
         pop_count = [p[0] for p in pop_count]
+        # pop_count = random.sample(pop_count, self.max_id)
         pop_count = set(pop_count[:self.max_id])
         chosen_user = dd(list)
         count = 0

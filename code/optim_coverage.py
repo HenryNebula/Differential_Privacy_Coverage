@@ -167,7 +167,7 @@ class Diff_Coverage():
         elif self.data_source == "SG":
             rd = SG(k_favor=self.k_favor, max_id=self.plc_num)
             sample = rd.make_grid()
-            self.people = sample.shape[0]
+            self.people, self.plc_num = sample.shape
         else:
             rd = CG(k_favor=self.k_favor, people=self.people, max_id=self.plc_num)
             sample = rd.make_grid()
