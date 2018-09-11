@@ -32,7 +32,7 @@ class Diff_Coverage():
 
     def __init__(self, uniform=True, f=0, flip_p=0.001, flip_q = 0.1, data_src="SG",
                  plc_num=200,people=500, candidate_num=50, k_favor=5,
-                 max_iter=200,random_start=5,obfuscate=0, granu=0.2):
+                 max_iter=200,random_start=5,obfuscate=0, granu=0.2, hist=False):
         # constants in rappor
         self.f = f
         self.p = flip_p
@@ -57,6 +57,11 @@ class Diff_Coverage():
         self.a = None
         self.b = None
         self.prior_dict = {}
+        # remap_id: ([(contains original locs)], sum_of_prior)
+        self.enable_hist = hist
+        self.histeq_dict = {}
+        self.nnz_array = None
+        self.overlap_array = None
 
         self.prob_mat = None
         self.random_start = random_start
@@ -115,6 +120,27 @@ class Diff_Coverage():
         return ratio
 
     def update_prior(self, sample):
+        def histeq():
+            L = self.plc_num
+            cdf = np.cumsum(self.xi) / np.sum(self.xi)
+            level = np.ceil((L-1)*cdf + 0.5) - 1
+
+            new_pdf = np.zeros((L,1))
+
+            for i, l in enumerate(level):
+                l = int(l)
+                # TODO: First map(histeq) and Second Map(delete zeros)
+                new_pdf[l] += self.xi[i]
+                if l not in self.histeq_dict:
+                    self.histeq_dict[l] = [[],0]
+                self.histeq_dict[l][1] = new_pdf[l]
+                self.histeq_dict[l][0].append(i)
+
+            self.nnz_array = np.where(new_pdf!=0)[0]
+            self.overlap_array = np.array([min(len(self.histeq_dict[l][0]), 100) for l in self.nnz_array])
+            self.xi = new_pdf[new_pdf!=0]
+            self.plc_num = len(self.xi)
+
         if self.uniform:
             self.xi = np.ones(self.plc_num) * self.k_favor / (self.plc_num + 0.0)
             self.prior_dict[self.xi[0]] = 0
@@ -126,6 +152,10 @@ class Diff_Coverage():
         self.xi = self.xi + np.random.rand(self.xi.shape[0]) * self.obfuscate * np.mean(self.xi)
         self.xi[self.xi < 0] = 0.0
         self.xi[self.xi > 1] = 1
+        if self.enable_hist:
+            histeq()
+        else:
+            self.overlap_array = np.ones(self.xi.shape)
 
     def real_sample(self, draw=False):
         if self.data_source == "MCS":
@@ -146,6 +176,14 @@ class Diff_Coverage():
             self.data_source, self.p, self.people, self.candidate_num, self.k_favor)
 
         self.update_prior(sample)
+        old_sample = sample.copy()
+        if self.enable_hist:
+            new_sample = np.zeros((sample.shape[0], len(self.nnz_array)))
+            #TODO: change sample columns
+            for i, col in enumerate(self.nnz_array):
+                aggregate_cols = self.histeq_dict[col][0]
+                new_sample[:, i] = np.sum(sample[:, aggregate_cols], axis=1)
+            sample = np.array(new_sample, dtype=bool)
         if draw:
             row_sum = np.sum(sample, axis=0)
             idx = range(np.max(row_sum)+1)
@@ -155,7 +193,7 @@ class Diff_Coverage():
             plt.loglog(idx, count)
             print 'plot it'
             plt.savefig('self-xi.png')
-        return sample
+        return sample, old_sample
 
     # create "fake" dataset after random response
     def transfer_sample(self, sample, draw=False):
@@ -247,7 +285,9 @@ class Diff_Coverage():
     def grad_boosting(self, sum_row, party, unused):
 
         def compute_grad(sum_):
-            grad_ = abs(self.a * np.exp(self.b) * np.exp(self.a * sum_row)).T
+            grad_ = np.array(self.overlap_array.squeeze(), dtype=np.float64)
+            grad_ *= abs(self.a * np.exp(self.b) * np.exp(self.a * sum_row))
+            grad_ = grad_.T
             # change to KL-divergence
             # grad_ *= (self.a * sum_row + self.b + 1 - np.log(1 / self.plc_num))
             grad_ = sparse.csr_matrix(grad_)
@@ -383,7 +423,7 @@ class Diff_Coverage():
                 final_choice = choice
         return final_choice
 
-    def perfect_baseline(self, ts):
+    def perfect_baseline(self, ts, baseline='perfect'):
         plcs = set()
         final_choice = []
         count = 0
@@ -400,7 +440,7 @@ class Diff_Coverage():
             true_sample[:, new_plcs] = 0
             count = count + 1
             if old_sum == len(plcs):
-                print 'only needs: ', count
+                print '{} only needs: {}'.format(baseline, count)
                 whole_group = set(range(true_sample.shape[0]))
                 newly_add = whole_group.difference(set(final_choice))
                 final_choice += list(newly_add)[0:self.candidate_num - len(final_choice)]
@@ -415,6 +455,7 @@ class Diff_Coverage():
     def validate(self,true_sample, trans_sample, choice, times=1):
 
         def plot_by_loc(choice_list):
+
 
             def plot_core(ax, sum_, legend, max_=50):
                 # sum_ = sorted(sum_, reverse=True)
@@ -440,8 +481,6 @@ class Diff_Coverage():
             # plt.tight_layout()
             plt.show()
 
-
-
         result = []
         choice_list = []
 
@@ -463,7 +502,7 @@ class Diff_Coverage():
         noisy_result = []
         random_result = []
         for i in range(times):
-            max_sum, final_choice = self.perfect_baseline(trans_sample)
+            max_sum, final_choice = self.perfect_baseline(trans_sample, baseline='noisy')
             choice_list.append(final_choice)
             final_party = true_sample[final_choice, :]
             real_sum = np.sum(np.sum(final_party, axis=0) > 0)

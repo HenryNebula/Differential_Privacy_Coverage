@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="13c2deab-dadd-45eb-84ff-2e4123d85d53" name="Google_CPU" url="http://35.230.69.66">
+        <fileTransfer host="35.230.69.66" port="22" privateKey="$PROJECT_DIR$/../../code/gcp_ssh" rootFolder="/home/HenryHuang" accessType="SFTP" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

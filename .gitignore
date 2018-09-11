@@ -28,3 +28,5 @@ XY\.npz
 change_prior/
 
 *.npz
+
+output/

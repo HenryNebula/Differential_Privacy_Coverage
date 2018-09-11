@@ -11,7 +11,7 @@ from scipy.spatial import KDTree
 
 from datetime import datetime
 from scipy import sparse
-
+from collections import defaultdict as dd
 MAX_LAT = 40.426
 MIN_LAT = 39.414
 MAX_LON = 117.119
@@ -130,83 +130,67 @@ class MCS():
 
 # social graph
 class SG():
-    def __init__(self, k_favor, max_id=1500):
+    def __init__(self, k_favor, max_id=6000):
         self.k_favor = k_favor
         self.max_id = max_id
 
     def read_scratch(self):
-        with open(data_dir + "social_graph", 'r') as f:
-            l = f.readlines()
-        user_list = [list(set(item.strip('\r\n').split(' '))) for item in l]
-        with open(data_dir + "social_graph.json",'w') as f_write:
-            f_write.write(json.dumps(user_list,indent=4))
-        user_dict = {}
+        with open(data_dir + "twitter_combined.txt", 'r') as f:
+            lines = map(lambda x: x.strip('\r\n').split(' '), f.readlines())
+        user_dict = dd(list)
         count = 0
-        for user in user_list:
-            for id_ in user:
-                if user_dict.has_key(id_):
-                    continue
-                else:
-                    user_dict[id_] = count
-                    count += 1
-        with open(data_dir + "social_dict.json",'w') as f_write:
-            f_write.write(json.dumps(user_dict,indent=4))
-
+        for l in lines:
+            source_u = int(l[0])
+            target_u  = int(l[1])
+            user_dict[source_u].append(target_u)
+        for source_u in user_dict:
+            if len(user_dict[source_u]) >= self.k_favor:
+                count += 1
+        print count
+        with open(data_dir + 'twitter_5.json', 'w') as f:
+            f.write(json.dumps(user_dict, indent=0))
 
     def popularity(self):
-        with open(data_dir + "social_graph.json",'r') as f:
-            user_list = json.loads(f.read())
+        with open(data_dir + "twitter_5.json",'r') as f:
+            user_dict = json.loads(f.read())
 
-        with open(data_dir + "social_dict.json",'r') as f_write:
-            user_dict = json.loads(f_write.read())
+        pop_count = dd(int)
+        for user in user_dict:
+            for target in user_dict[user]:
+                pop_count[target] += 1
 
-        count_dict = {}
-        for ul in user_list:
-            for user in ul:
-                if count_dict.has_key(user_dict[user]):
-                    count_dict[user_dict[user]] += 1
-                else:
-                    count_dict[user_dict[user]] = 1
-
-        popular = sorted(count_dict.items(), key=lambda x: x[1], reverse=True)
-        with open(data_dir + "popularity.json", 'w') as f:
-            f.write(json.dumps(popular, indent=0))
+        pop_count = sorted(pop_count.items(), key=lambda x: x[1], reverse=True)
+        pop_count = [p[0] for p in pop_count]
+        pop_count = set(pop_count[:self.max_id])
+        chosen_user = dd(list)
+        count = 0
+        for user in user_dict:
+            if len(set(user_dict[user]).intersection(pop_count)) > self.k_favor:
+                count += 1
+                chosen_user[user] = list(set(user_dict[user]).intersection(pop_count))[:self.k_favor]
+        print count
+        return chosen_user
 
     def make_grid(self):
-        with open(data_dir + "social_graph.json",'r') as f:
-            user_list = json.loads(f.read())
-        with open(data_dir + "social_dict.json",'r') as f_write:
-            user_dict = json.loads(f_write.read())
-        with open(data_dir + "popularity.json",'r') as f_write:
-            popular = json.loads(f_write.read())
+        chosen_user = self.popularity()
+        target_dict = {}
+        t_count = 0
+        for user in chosen_user:
+            for target in chosen_user[user]:
+                if target not in target_dict:
+                    target_dict[target] = t_count
+                    t_count += 1
+            chosen_user[user] = [target_dict[t] for t in chosen_user[user]]
 
-        choose = []
-        target_user = popular[0:self.max_id]
-        id_dict = {}
-        for i, t in enumerate(target_user):
-            id_dict[t[0]] = i
-        target_user = set([t[0] for t in target_user])
+        bit_array = np.full((len(chosen_user), t_count), False)
+        for id_, user in enumerate(chosen_user.keys()):
+            bit_array[id_, chosen_user[user]] = True
 
-
-        for id_, user in enumerate(user_list):
-            if len(user) < self.k_favor:
-                continue
-            user_id = map(lambda x: user_dict[x], user)
-            user_id = set(user_id).intersection(target_user)
-            user_id = list(user_id)
-            # user_id = user_id[user_id < self.max_id]
-            if len(user_id) >= self.k_favor:
-                choose.append((id_, user_id[0:self.k_favor]))
-
-        # bit_array = np.zeros((len(choose), self.max_id))
-        bit_array = np.full((len(choose), self.max_id), False)
-        for i, choice in enumerate(choose):
-            for c in choice[1]:
-                bit_array[i, id_dict[c]] = 1
-        # return bit_array[random.sample(range(bit_array.shape[0]), self.people), :]
-        print "Current recruited:{0}".format(bit_array.shape[0])
-        return  bit_array
-        # return init_pick(bit_array, self.people)
+        sparse_bit_array = sparse.csr_matrix(bit_array, dtype=bool)
+        print "{0} Finish Constructing Sparse Matrix, shape {1}, nonzeros {2}".format(datetime.now(),
+                                                                                      sparse_bit_array.shape,
+                                                                                      sparse_bit_array.nnz)
+        return bit_array
 
 
 # contact graph
@@ -266,9 +250,7 @@ class CG():
         return bit_array[0:self.people,:]
 
 
-mcs = MCS(x_granu=0.0175, y_granu=0.0175,k_favor=5)
-mcs.read_scratch(draw=False)
-
-# sg = SG(k_favor=3)
+# sg = SG(k_favor=10)
+# sg.make_grid()
 # sg.popularity()
 # sg.make_grid()
