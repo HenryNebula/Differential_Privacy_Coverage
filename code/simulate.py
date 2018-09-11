@@ -57,13 +57,13 @@ if __name__ == '__main__':
 
     data_src = 'SG'
     if data_src == 'SG':
-        cands = range(600, 1400, 200)
-        plc_num = range(1000, 2600, 500)
-        p = 0.02
-        eps = 4
-        granu = 0.02
-        k_favor = 5
-        hist = True
+        cands = [600]
+        plc_num = [1500]
+        p = [0.02]
+        eps = range(1,15)
+        granu = [0.02]
+        k_favor = [5]
+        hist = [False]
 
         paras = product(cands, k_favor, plc_num, p, granu, eps, hist)
     else:
@@ -71,9 +71,9 @@ if __name__ == '__main__':
         k_favor = [5]
         p = [0.02,1e-3]
         granu = [0.05]
-        eps = range(1,11)
-        hist = False
-        plc_num = -1
+        eps = range(1,15)
+        hist = [True]
+        plc_num = [-1]
 
         paras = product(cands, k_favor, plc_num, p, granu, eps, hist)
         # paras = product(cands, k_favor, p, loc)
@@ -87,7 +87,8 @@ if __name__ == '__main__':
             "plc_num": loc,
             "granu": granu,
             "eps": eps,
-            "hist": hist
+            "hist": hist,
+            "data_src":data_src
         }))
         pcs[-1].start()
     for process in pcs:
