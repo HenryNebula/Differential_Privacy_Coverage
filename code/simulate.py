@@ -38,7 +38,6 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
         return
 
     choice = new_simulation.train(optimizer='gradient')
-    new_simulation.rappor_baseline()
     result, percentile = new_simulation.validate(choice, times=1)
     print percentile
     print 'Result:{}'.format(result)
@@ -56,11 +55,11 @@ if __name__ == '__main__':
 
     data_src = 'SG'
     if data_src == 'SG':
-        cands = [600]
+        cands = [50]
         k_favor = [5]
-        p = [0.02]
-        eps = [10]
-        granu = [1000]
+        p = [1e-6]
+        eps = [40]
+        granu = [200]
         hist = [False]
 
     else:

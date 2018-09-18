@@ -489,16 +489,14 @@ class Diff_Coverage():
         max_sum = len(plcs)
         return max_sum, final_choice
 
-    def rappor_baseline(self, alpha=0.05):
+    def rappor_baseline(self, alpha=0.1):
 
-        def lasso_sig(trans_sample, lasso=False):
+        def lasso_sig(trans_sample, lasso=True):
             N,M = trans_sample.shape
             sum_row = np.sum(trans_sample, axis=0)
             y = sum_row - (self.p + 0.5 * self.f * (self.q - self.p)) * N
             y /= (1 - self.f) * (self.q - self.p)
             X = np.eye(M)
-            _, pval = f_regression(X, y)
-            significants = len(np.where(pval > 0.05 / M)[0])
             
             if lasso:
                 lasso = Lasso(alpha=alpha, )
@@ -511,6 +509,9 @@ class Diff_Coverage():
                     significants = len(np.where(pval>0.05/M)[0])
                 else:
                     significants = 0
+            else:
+                _, pval = f_regression(X, y)
+                significants = len(np.where(pval > 0.05 / M)[0])
             return significants
 
         max_sig = -1
@@ -524,7 +525,7 @@ class Diff_Coverage():
                 temp_choice.append(user)
                 trans_ = self.perturbed_sample[temp_choice, :]
                 significants = lasso_sig(trans_)
-                if significants > max_sig:
+                if significants >= max_sig:
                     max_sig = significants
                     newly_add = user
             if newly_add != -1:
@@ -534,7 +535,7 @@ class Diff_Coverage():
                 break
         if len(choice) < self.candidate_num:
             unused = list(unused)
-            choice.union(set(unused[:self.candidate_num - len(choice)]))
+            choice = choice.union(set(unused[:self.candidate_num - len(choice)]))
 
         return 0,list(choice)
 
@@ -574,7 +575,7 @@ class Diff_Coverage():
 
         max_sum, final_choice = self.perfect_baseline(true_sample)
         choice_list.append(final_choice)
-        result.append((max_sum, self.fast_post_sum(np.sum(trans_sample[final_choice], 0), fast_mode=True)))
+        result.append((max_sum, self.fast_post_sum(np.sum(trans_sample[final_choice, :], 0), fast_mode=True)))
 
         true_opt_party = true_sample[choice, :]
         fake_opt_party = trans_sample[choice, :]
