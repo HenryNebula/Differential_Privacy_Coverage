@@ -5,7 +5,7 @@ from multiprocessing import Process
 import time
 
 
-def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=False):
+def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=False, max_num=1):
     candidate = candidate
     k_favor = k_favor
     p = p
@@ -39,27 +39,35 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
 
     choice = new_simulation.train(optimizer='gradient')
     result, percentile = new_simulation.validate(choice, times=1)
-    print percentile
-    print 'Result:{}'.format(result)
-    if not os.path.isdir(output_dir + data_src):
-        os.mkdir(output_dir + data_src)
 
-    with open(file_name, 'w') as f:
-        f.writelines("People:{0}, Target:{1}, Non-Target:{2}\n".format(new_simulation.people, new_simulation.target_num,
-                                                                       new_simulation.nnz_target_num))
-        f.writelines("Result:{}\n".format(result))
-        f.writelines("Percentile:{}\n".format(percentile))
+    for i in range(max_num):
+        file_name += '_'
+        file_name += str(i)
+        print percentile
+        print 'Result:{}'.format(result)
+        if not os.path.isdir(output_dir + data_src):
+            os.mkdir(output_dir + data_src)
+
+        with open(file_name, 'w') as f:
+            f.writelines("People:{0}, Target:{1}, Non-Target:{2}\n".format(new_simulation.people, new_simulation.target_num,
+                                                                           new_simulation.nnz_target_num))
+            f.writelines("Result:{}\n".format(result))
+            f.writelines("Percentile:{}\n".format(percentile))
+
+        if max_num > 1:
+            choice = new_simulation.train(optimizer='gradient', freeze=True)
+            result, percentile = new_simulation.validate(choice, times=1)
 
 
 if __name__ == '__main__':
 
     data_src = 'SG'
     if data_src == 'SG':
-        cands = [50]
-        k_favor = [5]
-        p = [1e-6]
-        eps = [40]
-        granu = [200]
+        cands = [40]
+        k_favor = [7]
+        p = [8e-2]
+        eps = [4]
+        granu = [250]
         hist = [False]
 
     else:
@@ -67,7 +75,7 @@ if __name__ == '__main__':
         k_favor = [5]
         plc_num = [1000]
         p = [0.02]
-        eps = [10]
+        eps = [4]
         granu = [0.02]
         hist = [False]
 

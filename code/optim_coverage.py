@@ -370,13 +370,13 @@ class Diff_Coverage():
         else:
             return self.sum_posterior(sum_)
 
-    def train(self, use_grad=True, optimizer='gradient'):
-        self.real_sample()
-        self.transfer_sample()
-        # first fit the linear regression coefficients
-        self.posterior_regression(draw=False)
+    def train(self, use_grad=True, optimizer='gradient', freeze=False):
+        if not freeze:
+            self.real_sample()
+            self.transfer_sample()
+            # first fit the linear regression coefficients
+            self.posterior_regression(draw=False)
         trans_sample = self.perturbed_sample
-
 
         min_loss = 1e10
         final_choice = []
@@ -517,7 +517,7 @@ class Diff_Coverage():
         max_sig = -1
         choice = {np.random.randint(0, self.perturbed_sample.shape[0] - 1)}
         unused = set(range(self.perturbed_sample.shape[0])).difference(choice)
-        for i in range(self.perturbed_sample.shape[0]):
+        for i in range(self.candidate_num-1):
             print "LASSO {}".format(i)
             newly_add = -1
             for user in unused:
@@ -541,7 +541,7 @@ class Diff_Coverage():
 
 
     # compare with two baseline: use "fake data" directly and greedy random search
-    def validate(self, choice, times=1):
+    def validate(self, choice, times=1, rappor=False):
         true_sample = self.raw_sample
         trans_sample = self.perturbed_sample
 
@@ -591,8 +591,10 @@ class Diff_Coverage():
         noisy_result, noisy_post = [], []
         random_result, random_post = [], []
         for i in range(times):
-            # max_sum, final_choice = self.perfect_baseline(trans_sample, baseline='noisy')
-            max_sum, final_choice = self.rappor_baseline()
+            if rappor:
+                max_sum, final_choice = self.rappor_baseline()
+            else:
+                max_sum, final_choice = self.perfect_baseline(trans_sample, baseline='noisy')
             choice_list.append(final_choice)
             true_noisy_party = true_sample[final_choice,:]
             fake_noisy_party = trans_sample[final_choice, :]
