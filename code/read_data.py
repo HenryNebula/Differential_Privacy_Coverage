@@ -122,9 +122,9 @@ class MCS():
         for row, indice in enumerate(loc_list):
             bit_array[row, indice] = True
 
-        sparse_bit_array = sparse.csr_matrix(bit_array, dtype=bool)
-        print "{0} Finish Constructing Sparse Matrix, shape {1}, nonzeros {2}".format(datetime.now(),
-                                                                        sparse_bit_array.shape, sparse_bit_array.nnz)
+        # sparse_bit_array = sparse.csr_matrix(bit_array, dtype=bool)
+        # print "{0} Finish Constructing Sparse Matrix, shape {1}, nonzeros {2}".format(datetime.now(),
+        #                                                                 sparse_bit_array.shape, sparse_bit_array.nnz)
         return bit_array
 
 
