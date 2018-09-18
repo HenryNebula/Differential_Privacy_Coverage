@@ -533,7 +533,8 @@ class Diff_Coverage():
             else:
                 break
         if len(choice) < self.candidate_num:
-            choice.add(random.choice(unused, self.candidate_num - len(choice)))
+            unused = list(unused)
+            choice.union(set(unused[:self.candidate_num - len(choice)]))
 
         return 0,list(choice)
 

@@ -39,7 +39,7 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
 
     choice = new_simulation.train(optimizer='gradient')
     new_simulation.rappor_baseline()
-    result, percentile = new_simulation.validate(choice, times=5)
+    result, percentile = new_simulation.validate(choice, times=1)
     print percentile
     print 'Result:{}'.format(result)
     if not os.path.isdir(output_dir + data_src):
@@ -56,39 +56,23 @@ if __name__ == '__main__':
 
     data_src = 'SG'
     if data_src == 'SG':
-<<<<<<< Updated upstream
         cands = [600]
-        plc_num = [1500]
-        p = [0.02]
-        eps = range(1,15)
-        granu = [0.02]
-=======
-        cands = range(300, 1100, 1200)
-        plc_num = range(1000, 1200, 500)
-        p = [5e-3]
-        eps = [10]
->>>>>>> Stashed changes
         k_favor = [5]
+        p = [0.02]
+        eps = [10]
+        granu = [1000]
         hist = [False]
 
-        paras = product(cands, k_favor,p, plc_num, eps, hist)
     else:
-        cands = [320]
+        cands = [600]
         k_favor = [5]
-<<<<<<< Updated upstream
-        p = [0.02,1e-3]
-        granu = [0.05]
-        eps = range(1,15)
-        hist = [True]
-        plc_num = [-1]
-=======
-        p = [0.0001]
-        granu = [0.035]
-        eps = [40]
-        hist = [True, False]
->>>>>>> Stashed changes
+        plc_num = [1000]
+        p = [0.02]
+        eps = [10]
+        granu = [0.02]
+        hist = [False]
 
-        paras = product(cands, k_favor, p, granu, eps, hist)
+    paras = product(cands,k_favor, p, granu, eps, hist)
         # paras = product(cands, k_favor, p, loc)
     pcs = []
     for parameter in paras:
@@ -100,11 +84,7 @@ if __name__ == '__main__':
             "constraint": granu,
             "eps": eps,
             "hist": hist,
-<<<<<<< Updated upstream
             "data_src":data_src
-=======
-            "data_src": data_src
->>>>>>> Stashed changes
         }))
         pcs[-1].start()
     for process in pcs:
