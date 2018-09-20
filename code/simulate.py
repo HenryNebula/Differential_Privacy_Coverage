@@ -10,7 +10,7 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
     k_favor = k_favor
     p = p
     q = 1.0 / ((1.0 - p) / (p * np.exp(eps)) + 1)
-    if q < 0.8:
+    if q < 0.6:
         print("q:{0}, q is too small!".format(q))
         exit(1)
     elif eps > 10 and p > (1 - q) * 1e6:
@@ -38,7 +38,7 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
         return
 
     choice = new_simulation.train(optimizer='gradient')
-    result, percentile = new_simulation.validate(choice, times=1)
+    result, percentile = new_simulation.validate(choice, times=1, rappor=True)
 
     for i in range(max_num):
         file_name += '_'
@@ -63,20 +63,19 @@ if __name__ == '__main__':
 
     data_src = 'SG'
     if data_src == 'SG':
-        cands = [40]
-        k_favor = [7]
-        p = [8e-2]
+        cands = [20]
+        k_favor = [5]
+        p = [0.03]
         eps = [4]
-        granu = [250]
+        granu = [150]
         hist = [False]
 
     else:
         cands = [600]
         k_favor = [5]
-        plc_num = [1000]
-        p = [0.02]
-        eps = [4]
-        granu = [0.02]
+        p = [1e-6]
+        eps = [14]
+        granu = [2500]
         hist = [False]
 
     paras = product(cands,k_favor, p, granu, eps, hist)

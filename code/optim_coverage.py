@@ -489,10 +489,11 @@ class Diff_Coverage():
         max_sum = len(plcs)
         return max_sum, final_choice
 
-    def rappor_baseline(self, alpha=0.1):
+    def rappor_baseline(self, alpha=0.05):
 
         def lasso_sig(trans_sample, lasso=True):
             N,M = trans_sample.shape
+            N *= self.k_favor
             sum_row = np.sum(trans_sample, axis=0)
             y = sum_row - (self.p + 0.5 * self.f * (self.q - self.p)) * N
             y /= (1 - self.f) * (self.q - self.p)
