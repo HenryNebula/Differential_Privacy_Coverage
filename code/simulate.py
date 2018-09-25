@@ -10,7 +10,7 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
     k_favor = k_favor
     p = p
     q = 1.0 / ((1.0 - p) / (p * np.exp(eps)) + 1)
-    if q < 0.6:
+    if q < 0.5:
         print("q:{0}, q is too small!".format(q))
         exit(1)
     elif eps > 10 and p > (1 - q) * 1e6:
@@ -21,7 +21,7 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
 
     new_simulation = Diff_Coverage(flip_p=p, flip_q=q, data_src=data_src,
                                    target_constraint=constraint, candidate_num=candidate,
-                                   k_favor=k_favor, hist=hist, random_start=1)
+                                   k_favor=k_favor, hist=hist, random_start=1, uniform=False)
 
     if hist:
         data_src += '_hist_tmp'
@@ -38,7 +38,10 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
         return
 
     choice = new_simulation.train(optimizer='gradient')
-    result, percentile = new_simulation.validate(choice, times=1, rappor=True)
+    pri = np.sum(new_simulation.raw_sample[choice, :], axis=0) / (new_simulation.candidate_num + .0 )
+
+    np.save('our_choice', pri)
+    result, percentile = new_simulation.validate(choice, times=5, rappor=False)
 
     for i in range(max_num):
         file_name += '_'
@@ -56,16 +59,16 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
 
         if max_num > 1:
             choice = new_simulation.train(optimizer='gradient', freeze=True)
-            result, percentile = new_simulation.validate(choice, times=1)
+            result, percentile = new_simulation.validate(choice, times=5)
 
 
 if __name__ == '__main__':
 
-    data_src = 'SG'
+    data_src = 'MCS'
     if data_src == 'SG':
-        cands = [20]
-        k_favor = [5]
-        p = [0.03]
+        cands = [40]
+        k_favor = [8]
+        p = [2e-2]
         eps = [4]
         granu = [150]
         hist = [False]
@@ -73,9 +76,9 @@ if __name__ == '__main__':
     else:
         cands = [600]
         k_favor = [5]
-        p = [1e-6]
-        eps = [14]
-        granu = [2500]
+        p = [2e-2]
+        eps = [4]
+        granu = [0.05]
         hist = [False]
 
     paras = product(cands,k_favor, p, granu, eps, hist)

@@ -3,9 +3,16 @@
   <component name="ChangeListManager">
     <list default="true" id="8041fbc9-20b6-4569-9356-857f8562104d" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Test Notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/code/Test Notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/optim_coverage.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/code/optim_coverage.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/optim_coverage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/read_data.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/result_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/result_1000.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/result_1400.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/result_1800.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/result_600.jpg" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/code/simulate.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/simulate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/report/工作簿1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/report/工作簿1.xlsx" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -19,10 +26,10 @@
     <SUITE FILE_PATH="coverage/diff_privacy_test$optim_coverage.coverage" NAME="optim_coverage Coverage Results" MODIFIED="1532412363190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/code" />
     <SUITE FILE_PATH="coverage/diff_privacy_test$read_data__1_.coverage" NAME="read_data (1) Coverage Results" MODIFIED="1536632351529" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/code" />
     <SUITE FILE_PATH="coverage/diff_privacy_test$util.coverage" NAME="util Coverage Results" MODIFIED="1527842883129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/diff_privacy_test$simulate.coverage" NAME="simulate Coverage Results" MODIFIED="1537278870836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/code" />
+    <SUITE FILE_PATH="coverage/diff_privacy_test$simulate.coverage" NAME="simulate Coverage Results" MODIFIED="1537864716960" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/code" />
     <SUITE FILE_PATH="coverage/diff_privacy_test$untitled.coverage" NAME="untitled Coverage Results" MODIFIED="1527842951358" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/diff_privacy_test$read_data.coverage" NAME="read_data Coverage Results" MODIFIED="1531824070076" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/diff_privacy_test$optim_coverage__1_.coverage" NAME="optim_coverage (1) Coverage Results" MODIFIED="1534549126354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/code" />
+    <SUITE FILE_PATH="coverage/diff_privacy_test$optim_coverage__1_.coverage" NAME="optim_coverage (1) Coverage Results" MODIFIED="1537861736382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/code" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -43,8 +50,8 @@
       <file leaf-file-name="simulate.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/code/simulate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
-              <caret line="40" column="77" selection-start-line="40" selection-start-column="77" selection-end-line="40" selection-end-column="77" />
+            <state relative-caret-position="-7">
+              <caret line="23" column="92" selection-start-line="23" selection-start-column="92" selection-end-line="23" selection-end-column="92" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -52,13 +59,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="optim_coverage.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="optim_coverage.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/code/optim_coverage.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3173">
-              <caret line="491" column="40" selection-start-line="491" selection-start-column="40" selection-end-line="491" selection-end-column="40" />
+            <state relative-caret-position="4911">
+              <caret line="398" lean-forward="true" selection-start-line="398" selection-end-line="398" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="read_data.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/code/read_data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="443">
+              <caret line="177" column="23" lean-forward="true" selection-start-line="177" selection-start-column="23" selection-end-line="177" selection-end-column="23" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -138,8 +157,8 @@
         <option value="$PROJECT_DIR$/code/test.py" />
         <option value="$PROJECT_DIR$/code/directory.py" />
         <option value="$PROJECT_DIR$/code/read_data.py" />
-        <option value="$PROJECT_DIR$/code/simulate.py" />
         <option value="$PROJECT_DIR$/code/optim_coverage.py" />
+        <option value="$PROJECT_DIR$/code/simulate.py" />
       </list>
     </option>
   </component>
@@ -173,6 +192,12 @@
               <item name="diff_privacy_test" type="b2602c69:ProjectViewProjectNode" />
               <item name="diff_privacy_test" type="462c0819:PsiDirectoryNode" />
               <item name="code" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="diff_privacy_test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="diff_privacy_test" type="462c0819:PsiDirectoryNode" />
+              <item name="code" type="462c0819:PsiDirectoryNode" />
+              <item name="choice" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="diff_privacy_test" type="b2602c69:ProjectViewProjectNode" />
@@ -527,8 +552,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.simulate" />
-        <item itemvalue="Python.read_data (1)" />
         <item itemvalue="Python.optim_coverage (1)" />
+        <item itemvalue="Python.read_data (1)" />
         <item itemvalue="Python.read_data" />
         <item itemvalue="Python.optim_coverage" />
       </list>
@@ -563,19 +588,19 @@
       <window_info anchor="bottom" id="TODO" order="7" weight="0.32965517" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.43861067" side_tool="true" weight="0.35448277" />
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.5613893" weight="0.35448277" />
+      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.5613893" visible="true" weight="0.35448277" />
       <window_info anchor="bottom" id="Version Control" order="14" weight="0.07310345" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32827586" />
       <window_info anchor="bottom" id="Terminal" order="12" weight="0.32965517" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4920635" visible="true" weight="0.22859451" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4920635" visible="true" weight="0.2463651" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="7" weight="0.32956383" />
       <window_info anchor="right" x="0" y="22" width="1280" height="778" id="SciView" order="4" sideWeight="0.4920635" weight="0.73101777" />
       <window_info id="Structure" order="1" sideWeight="0.50793654" side_tool="true" weight="0.20516963" />
       <window_info anchor="bottom" id="Debug" order="4" sideWeight="0.54523426" weight="0.3986207" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" weight="0.32827586" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Coverage" order="5" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
       <window_info anchor="right" id="Remote Host" order="3" sideWeight="0.4989733" weight="0.1987076" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -586,36 +611,36 @@
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="File Transfer" order="0" sideWeight="0.62681746" weight="0.35034484" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32965517" />
-      <window_info anchor="right" id="Coverage" order="5" side_tool="true" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" weight="0.32827586" />
     </layout>
     <layout-to-restore>
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" visible="true" weight="0.32876712" />
+      <window_info anchor="right" x="0" y="0" width="270" height="600" id="Documentation" order="8" sideWeight="0.50793654" side_tool="true" weight="0.26898223" />
+      <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info active="true" anchor="bottom" id="Run" order="3" sideWeight="0.49919224" visible="true" weight="0.32413793" />
       <window_info anchor="right" id="Remote Host" order="3" sideWeight="0.4989733" weight="0.21001616" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" id="Data View" order="6" weight="0.32956383" />
       <window_info id="Structure" order="1" sideWeight="0.50793654" side_tool="true" weight="0.20516963" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="7" />
       <window_info anchor="bottom" id="Version Control" order="14" weight="0.07310345" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4920635" visible="true" weight="0.23424879" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32827586" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32965517" />
-      <window_info anchor="right" x="0" y="0" width="270" height="600" id="Documentation" order="8" sideWeight="0.50793654" side_tool="true" weight="0.26898223" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4920635" visible="true" weight="0.23424879" />
       <window_info anchor="right" id="Database" order="7" weight="0.32956383" />
       <window_info anchor="bottom" id="Terminal" order="12" weight="0.32965517" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.3986207" />
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
-      <window_info anchor="right" x="0" y="22" width="1280" height="778" id="SciView" order="4" sideWeight="0.4920635" weight="0.36591277" />
-      <window_info anchor="bottom" id="File Transfer" order="0" sideWeight="0.7972536" weight="0.32965517" />
-      <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50080776" side_tool="true" weight="0.32413793" />
+      <window_info anchor="bottom" id="File Transfer" order="0" sideWeight="0.7972536" weight="0.32965517" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" visible="true" weight="0.32876712" />
+      <window_info anchor="right" x="0" y="22" width="1280" height="778" id="SciView" order="4" sideWeight="0.4920635" weight="0.36591277" />
       <window_info anchor="right" id="Coverage" order="5" side_tool="true" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32827586" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -658,16 +683,6 @@
           <line>361</line>
           <option name="timeStamp" value="123" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/code/optim_coverage.py</url>
-          <line>536</line>
-          <option name="timeStamp" value="145" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/code/optim_coverage.py</url>
-          <line>576</line>
-          <option name="timeStamp" value="146" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -676,7 +691,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="147" />
+      <option name="time" value="157" />
     </breakpoint-manager>
   </component>
   <component name="debuggerHistoryManager">
@@ -734,47 +749,52 @@
     </expressions>
     <expressions id="evaluateExpression">
       <expression>
-        <expression-string>choice = choice.union(set(unused[:self.candidate_num - len(choice)]))</expression-string>
+        <expression-string>np.save('./choice/init_best', choice_)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>choice.union(set(unused[:self.candidate_num - len(choice)]))</expression-string>
+        <expression-string>np.save('random_choice', choice_random)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>set(unused[:self.candidate_num - len(choice)])</expression-string>
+        <expression-string>choice_random = np.sum(true_sample[choice_, :], axis=0) / (self.candidate_num  + 0.0)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>self.candidate_num</expression-string>
+        <expression-string>choice_random = true_sample[choice_, :] / (self.candidate_num  + 0.0)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>len(choice)</expression-string>
+        <expression-string>choice_random = np.sum(choice_, axis=0) / (self.candidate_num  + 0.0)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>len(coef.indices)</expression-string>
+        <expression-string>np.save(&quot;random_choice&quot;, random_choice)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>part_a[0]</expression-string>
+        <expression-string>random_choice = np.sum(true_sample[choice_, :], axis=0) / (self.people + 0.0)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>temp[0]</expression-string>
+        <expression-string>random_choice = np.sum(true_sample[choice_, :], axis=0) / self.people</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>temp[0,:]</expression-string>
+        <expression-string>random_choice = np.sum(true_sample[choice_, :], axis=600) / self.people</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>np.save(&quot;crowd_choice&quot;, self.xi)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
@@ -1134,20 +1154,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/code/read_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-597">
-          <caret line="165" column="27" lean-forward="true" selection-start-line="165" selection-start-column="27" selection-end-line="165" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/code/simulate.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="40" column="77" selection-start-line="40" selection-start-column="77" selection-end-line="40" selection-end-column="77" />
+        <state relative-caret-position="-7">
+          <caret line="23" column="92" selection-start-line="23" selection-start-column="92" selection-end-line="23" selection-end-column="92" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
           </folding>
@@ -1156,10 +1166,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/code/optim_coverage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3173">
-          <caret line="491" column="40" selection-start-line="491" selection-start-column="40" selection-end-line="491" selection-end-column="40" />
+        <state relative-caret-position="4911">
+          <caret line="398" lean-forward="true" selection-start-line="398" selection-end-line="398" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/code/read_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="443">
+          <caret line="177" column="23" lean-forward="true" selection-start-line="177" selection-start-column="23" selection-end-line="177" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>

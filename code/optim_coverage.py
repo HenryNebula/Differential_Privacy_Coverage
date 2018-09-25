@@ -10,9 +10,7 @@ from sklearn.feature_selection import f_regression
 from read_data import *
 import math
 from numpy.linalg import lstsq
-from datetime import datetime
 import scipy.sparse as sparse
-import functools
 
 def unwrap_self_find_coeffs(arg, **kwarg):
     return Diff_Coverage.find_coeffs(*arg, **kwarg)
@@ -94,18 +92,23 @@ class Diff_Coverage():
         if N > upper_bound:
             mu = N * p_0
             std = math.sqrt(N * p_0 * (1 - p_0))
-            numerator = Gaussian_Approx(X, mu, std) * (1 - xi) ** N
+            numerator = Gaussian_Approx(X, mu, std)
         else:
-            numerator = p_0 ** X * (1 - p_0) ** (N - X) * comb_mat[N, X] * (1 - xi) ** N
+            numerator = p_0 ** X * (1 - p_0) ** (N - X) * comb_mat[N, X]
+        if xi != 0.5: numerator *= (1 - xi) ** N
+
         for i in range(0, N + 1):
-            if N > upper_bound:
-                mu = N * xi
-                std = math.sqrt(N * xi * (1 - xi))
-                outer = Gaussian_Approx(i, mu, std)
-            else:
-                outer = comb_mat[N, i] * xi ** i * (1 - xi) ** (N - i)
-            if outer == 0.0:
-                continue
+            if xi != 0.5 :
+                if N > upper_bound:
+                    mu = N * xi
+                    std = math.sqrt(N * xi * (1 - xi))
+                    outer = Gaussian_Approx(i, mu, std)
+                else:
+                    outer = comb_mat[N, i] * xi ** i * (1 - xi) ** (N - i)
+                if outer == 0.0:
+                    continue
+            else: outer = 1.0
+
             inner = 0
             for m in range(max([0, X + i - N]), min([i, X]) + 1):
                 if i <= upper_bound:
@@ -122,6 +125,7 @@ class Diff_Coverage():
                     second_part = comb_mat[N - i, X - m] * p_0 ** (X - m) * (1 - p_0) ** (N - i - X + m)
                 inner += first_part * second_part
             sum_ += outer * inner
+        # print sum_
         ratio = numerator / sum_
         return ratio
 
@@ -148,7 +152,8 @@ class Diff_Coverage():
             self.nnz_target_num = len(self.xi)
 
         if self.uniform:
-            self.xi = np.ones(self.target_num) * self.k_favor / (self.target_num + 0.0)
+            # self.xi = np.ones(self.target_num) * 0.5
+            self.xi = np.ones(self.target_num) * 1 / self.people
             self.prior_dict[self.xi[0]] = 0
         else:
             self.xi = np.sum(sample, axis=0) / self.people
@@ -167,16 +172,15 @@ class Diff_Coverage():
         if self.data_source == "MCS":
             rd = MCS(k_favor=self.k_favor, x_granu=self.target_constraint, y_granu=self.target_constraint)
             sample = rd.read_scratch(draw=draw)
-            self.people, self.target_num = sample.shape
 
         elif self.data_source == "SG":
             rd = SG(k_favor=self.k_favor, max_id=self.target_constraint)
             sample = rd.make_grid()
-            self.people, self.target_num = sample.shape
         else:
             rd = CG(k_favor=self.k_favor, people=self.people, max_id=self.target_constraint)
             sample = rd.make_grid()
 
+        self.people, self.target_num = sample.shape
         print "Data source:{0}, p:{1}, people:{2}, candidate:{3}, target: {4}, k_favor:{5}".format(
             self.data_source, self.p, self.people, self.candidate_num, self.target_num, self.k_favor)
 
@@ -259,14 +263,6 @@ class Diff_Coverage():
         # now coefficients should be a matrix, each place has its own slope and intercept
         self.a = np.zeros(target_num)
         self.b = np.zeros(target_num)
-        # if self.uniform:
-        #     # print "Make posterior tables!"
-        #     self.prob_mat = np.array([self.posterior_core(x, self.xi[1]) for x in range(self.candidate_num + 1)])
-        #     self.prob_mat[np.isnan(self.prob_mat)] = 0
-        #     coeffs = self.find_coeffs(self.xi[1])
-        #     self.a = self.a + coeffs[0]
-        #     self.b = self.b * coeffs[1]
-        # else:
         prior_dict = {}
         plc_index = np.zeros(target_num)
         prior_list = []
@@ -324,12 +320,49 @@ class Diff_Coverage():
                 id_of_r = np.argpartition(candidate_sub.toarray().squeeze(), top_k)[:top_k]
             return id_of_r
 
+        def ada_prior(visit_mtx, sum_row, add):
+            def cal_prior(sum_):
+                xi = sum_ - (self.p + 0.5 * self.f * (self.q - self.p)) * N
+                xi /= (1 - self.f) * (self.q - self.p)
+                xi /= N
+                xi[xi<0] = 0
+                return xi
+
+            def cal_posterior(row_):
+                prior = cal_prior(row_)
+                post_sum = 0
+                for i, pri in enumerate(prior):
+                    post_sum += self.posterior_core(row_[i], pri)
+                return post_sum
+
+            Ind = []
+            N = visit_mtx.shape[0]
+            for i in range(N):
+                Ind.append(np.where(visit_mtx[i,:]))
+
+            old_row = np.array([sum_row[i] for i in Ind])
+            term = -1 if not add else 1
+            new_row = np.array([r + term for r in old_row])
+
+            old_sum_post = np.array([cal_posterior(r) for r in old_row])
+            new_sum_post = np.array([cal_posterior(r) for r in new_row])
+
+            grad_ = new_sum_post - old_sum_post
+            if top_k == 1:
+                id_of_r = [np.argmin(grad_)]
+            else:
+                id_of_r = np.argpartition(grad_.squeeze(), top_k)[:top_k]
+            return id_of_r
+
+
         def handler(optimizer, sum_row, party):
-            if optimizer not in ['gradient', 'coverage_gain']:
+            if optimizer not in ['gradient', 'coverage_gain', 'ada_prior']:
                 print('Wrong Optimizer {}'.format(optimizer))
                 exit(1)
             if optimizer == 'gradient':
                 optimizer = gradient
+            if optimizer == 'ada_prior':
+                optimizer = ada_prior
             else:
                 optimizer = coverage_gain
             party = party.copy()
@@ -341,29 +374,6 @@ class Diff_Coverage():
 
         return handler(optimizer, sum_row, party)
 
-    def intelli_grad(self, trans_sample):
-        sum_row = 0
-        count = 0
-        choice = []
-        while count <= self.candidate_num:
-            # grad_ = abs(self.a * np.exp(self.b) * np.exp(self.a * sum_row)).T
-            grad_ = abs((np.exp(self.a) - 1) * np.exp(self.a * sum_row + self.b)).T
-            candidate_add = np.dot(trans_sample, grad_)
-            id_of_r_ = np.argmax(candidate_add)
-            max_val = np.max(candidate_add)
-            if max_val != 0:
-                choice.append(id_of_r_)
-                sum_row += trans_sample[int(id_of_r_), :]
-                trans_sample[int(id_of_r_),:] = 0
-            else:
-                print 'Full now... Add random guys'
-                whole_party = set(range(trans_sample.shape[0]))
-                newly_add = list(whole_party.difference(set(choice)))
-                choice += newly_add[0: trans_sample.shape[0] - len(choice)]
-                break
-            count += 1
-        return choice
-
     def fast_post_sum(self, sum_, fast_mode=True):
         if fast_mode:
             return np.sum(np.exp(self.a * sum_ + self.b))
@@ -374,15 +384,21 @@ class Diff_Coverage():
         if not freeze:
             self.real_sample()
             self.transfer_sample()
-            # first fit the linear regression coefficients
-            self.posterior_regression(draw=False)
+
+            if optimizer != 'ada_prior':
+                # first fit the linear regression coefficients
+                self.posterior_regression(draw=False)
         trans_sample = self.perturbed_sample
 
         min_loss = 1e10
         final_choice = []
         for times in range(0, self.random_start):
             # choice means those ids which are in the candidate set
+
             choice = random.sample(range(self.people), self.candidate_num)
+
+            # _, choice = self.perfect_baseline(self.raw_sample)
+
             not_choice = list(set(range(self.people)).difference(set(choice)))
 
             choice, not_choice = np.array(choice), np.array(not_choice)
@@ -542,7 +558,7 @@ class Diff_Coverage():
 
 
     # compare with two baseline: use "fake data" directly and greedy random search
-    def validate(self, choice, times=1, rappor=False):
+    def validate(self, choice, times=1, rappor=False, post_cal=False):
         true_sample = self.raw_sample
         trans_sample = self.perturbed_sample
 
@@ -571,58 +587,39 @@ class Diff_Coverage():
             # plt.tight_layout()
             plt.show()
 
-        result = []
-        choice_list = []
+        def cal_utility(choice_, compute_post=True):
+            true_party = true_sample[choice_, :]
+            fake_party = trans_sample[choice_, :]
+            coverage = np.sum(np.sum(true_party, axis=0) > 0)
+            sum_row = np.sum(fake_party, axis=0)
+            posterior = self.fast_post_sum(sum_row) if compute_post else 0
+            return coverage, posterior
 
-        max_sum, final_choice = self.perfect_baseline(true_sample)
-        choice_list.append(final_choice)
-        result.append((max_sum, self.fast_post_sum(np.sum(trans_sample[final_choice, :], 0), fast_mode=True)))
-
-        true_opt_party = true_sample[choice, :]
-        fake_opt_party = trans_sample[choice, :]
-
-        choice_list.append(choice)
-
-        sum_row = np.sum(fake_opt_party, axis=0)
-        # total_sum_opt = self.sum_posterior(sum_row)
-        total_sum_opt = self.fast_post_sum(sum_row, fast_mode=True)
-        coverage_opt = np.sum(np.sum(true_opt_party, axis=0) > 0)
-        result.append((coverage_opt, total_sum_opt))
-
-        noisy_result, noisy_post = [], []
-        random_result, random_post = [], []
-        for i in range(times):
-            if rappor:
-                max_sum, final_choice = self.rappor_baseline()
+        def different_model(model=''):
+            if model == 'random' or model =='noisy':
+                coverage_list, posterior_list = [], []
+                for i in range(times):
+                    if model == 'random':
+                        choice_ = random.sample(range(self.people), self.candidate_num)
+                    else:
+                        if rappor:
+                            _, choice_ = self.rappor_baseline()
+                        else:
+                            _, choice_ = self.perfect_baseline(trans_sample, baseline='noisy')
+                    utility = cal_utility(choice_)
+                    coverage_list.append(utility[0])
+                    posterior_list.append(utility[1])
+                return np.mean(coverage_list), np.mean(posterior_list)
+            elif model == 'perfect':
+                _, choice_ = self.perfect_baseline(true_sample)
+                return cal_utility(choice_)
             else:
-                max_sum, final_choice = self.perfect_baseline(trans_sample, baseline='noisy')
-            choice_list.append(final_choice)
-            true_noisy_party = true_sample[final_choice,:]
-            fake_noisy_party = trans_sample[final_choice, :]
-            sum_row = np.sum(fake_noisy_party, axis=0)
-            real_sum = np.sum(np.sum(true_noisy_party, axis=0) > 0)
-            noisy_result.append(real_sum)
-            noisy_post.append(self.fast_post_sum(sum_row, fast_mode=True))
+                return cal_utility(choice)
 
-
-
-            rand_choice = random.sample(range(self.people), self.candidate_num)
-            choice_list.append(rand_choice)
-
-            true_rand_party = true_sample[rand_choice, :]
-            fake_rand_party = trans_sample[rand_choice, :]
-
-            # print out the posterior
-            sum_row = np.sum(fake_rand_party, axis=0)
-            # total_sum_rand = self.sum_posterior(sum_row)
-            total_sum_rand = self.fast_post_sum(sum_row, fast_mode=True)
-            coverage_rand = np.sum(np.sum(true_rand_party, axis=0) > 0)
-            random_result.append(coverage_rand)
-            random_post.append(total_sum_rand)
-
-        result.append((np.mean(noisy_result), np.mean(noisy_post)))
-        result.append((np.mean(random_result), np.mean(random_post)))
-
+        result = []
+        method = ['perfect','', 'noisy', 'random']
+        for m in method:
+            result.append(different_model(m))
         # first element is no_privacy, second is our alg, third is fake-data, last is random
         percentile = np.array([r[0] for r in result])
         percentile = percentile / percentile[-1]
