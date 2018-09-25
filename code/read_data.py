@@ -106,7 +106,7 @@ class MCS():
                 # most frequent visit is chosen
                 ordered_visit = sorted(user_visit.items(), key=lambda x: x[1], reverse=True)
                 inds, counts = zip(*ordered_visit)
-                loc_list.extend(inds[0:self.k_favor])
+                loc_list.extend(inds[-self.k_favor:])
 
         print "{0} Finish fitting to the grid, valid visit records: {1}".format(datetime.now(), len(loc_list))
 
@@ -163,7 +163,7 @@ class SG():
         pop_count = [p[0] for p in pop_count]
         # pop_count = random.sample(pop_count, self.max_id)
         # print self.max_id
-        pop_count = set(pop_count[:self.max_id])
+        pop_count = set(pop_count[self.max_id])
         chosen_user = dd(list)
         count = 0
         for user in user_dict:

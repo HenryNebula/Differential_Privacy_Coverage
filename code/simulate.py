@@ -21,7 +21,8 @@ def simulate_pipeline(candidate, k_favor, p, constraint, data_src, eps=4, hist=F
 
     new_simulation = Diff_Coverage(flip_p=p, flip_q=q, data_src=data_src,
                                    target_constraint=constraint, candidate_num=candidate,
-                                   k_favor=k_favor, hist=hist, random_start=1, uniform=False)
+                                   k_favor=k_favor, hist=hist, random_start=1, uniform=True
+                                     )
 
     if hist:
         data_src += '_hist_tmp'

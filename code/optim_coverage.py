@@ -152,8 +152,8 @@ class Diff_Coverage():
             self.nnz_target_num = len(self.xi)
 
         if self.uniform:
-            # self.xi = np.ones(self.target_num) * 0.5
-            self.xi = np.ones(self.target_num) * 1 / self.people
+            self.xi = np.ones(self.target_num) * 0.5
+#             self.xi = np.ones(self.target_num) * 1 / self.people
             self.prior_dict[self.xi[0]] = 0
         else:
             self.xi = np.sum(sample, axis=0) / self.people
@@ -609,12 +609,16 @@ class Diff_Coverage():
                     utility = cal_utility(choice_)
                     coverage_list.append(utility[0])
                     posterior_list.append(utility[1])
+                sum_row = np.sum(self.raw_sample[choice_, :], axis=0)
+                np.save('prior_' + model, sum_row)
                 return np.mean(coverage_list), np.mean(posterior_list)
             elif model == 'perfect':
                 _, choice_ = self.perfect_baseline(true_sample)
-                return cal_utility(choice_)
             else:
-                return cal_utility(choice)
+                choice_ = choice
+            sum_row = np.sum(self.raw_sample[choice_, :], axis=0)
+            np.save('prior_' + model, sum_row)
+            return cal_utility(choice_)
 
         result = []
         method = ['perfect','', 'noisy', 'random']
